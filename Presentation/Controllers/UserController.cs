@@ -12,8 +12,6 @@ namespace UserManagementService.Presentation.Controllers
     {
         private readonly IUserService _userService;
 
-       
-
         private readonly ILogger<UserController> _logger;
 
         public UserController(ILogger<UserController> logger, IUserService userService)
