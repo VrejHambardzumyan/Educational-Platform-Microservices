@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using UserManagementService.Application.Interfaces;
-using UserManagementService.Application.Models;
+using UserManagementService.Application.Models.DTOs;
 using UserManagementService.Presentation;
 
 namespace UserManagementService.Presentation.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]")]  
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -21,7 +21,7 @@ namespace UserManagementService.Presentation.Controllers
         }
 
         [HttpPost(Name = "AddUser")]
-        public async Task<IActionResult> AddUser(UserModel user)
+        public async Task<IActionResult> AddUser(UserDTO user)
         {
             await _userService.AddUser(user);
             return Ok();
