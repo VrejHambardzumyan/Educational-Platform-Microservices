@@ -6,7 +6,7 @@ namespace UserManagementService.Infrastructure.Repositories
     public class UserRepository(UserDbContext dbContext) : IUserRepository
     {
         private readonly UserDbContext _context = dbContext;
-        private List<User?> _users;
+        private List<User> _users;
         public async Task AddEntity(User entity)
 
         {

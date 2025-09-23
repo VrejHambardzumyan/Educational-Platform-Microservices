@@ -22,12 +22,12 @@ namespace UserManagementService.Application.Services
             if (existingUser != null)
                 throw new Exception("User already exists!");
 
-            var hashPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
             var user = new User
             {
                 UserName = userName,
-                Password = hashPassword
+                Password = hashedPassword
             };
 
             await _userRepository.AddEntity(user);
@@ -38,6 +38,7 @@ namespace UserManagementService.Application.Services
             var user = await _userRepository.GetByUserNameAsync(userName);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
                 throw new Exception("Invalid password");
+           
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
