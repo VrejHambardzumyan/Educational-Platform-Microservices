@@ -6,6 +6,5 @@ namespace UserManagementService.Application.Interfaces
     public interface IUserService
     {
         Task AddUser(UserDTO user);
-
     }
 }

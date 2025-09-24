@@ -12,8 +12,8 @@ namespace UserManagementService.Application.Services
 
         public async Task AddUser(UserDTO userModel)
         {
-            User user = new User() { 
-                UserName = userModel.Name ,
+            User user = new() { 
+                UserName = userModel.Name,
                 Email = userModel.Email,
                 Password = userModel.Password,
             };

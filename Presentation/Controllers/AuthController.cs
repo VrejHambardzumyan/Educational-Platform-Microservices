@@ -19,8 +19,8 @@ namespace UserManagementService.Presentation.Controllers
         [HttpPost("signUp")]
         public async Task<IActionResult> SignUp(SignUpRequestDTO request)
         {
-            await _authService.RegisterUser(request.UserName, request.Password);
-            return Ok(new { message = "User registered successfully" });
+            var tokenResponse  = await _authService.RegisterUser(request.UserName, request.Password);
+            return Ok(tokenResponse);
         }
 
         [HttpPost("login")]
@@ -33,5 +33,16 @@ namespace UserManagementService.Presentation.Controllers
             }
             return Unauthorized(new { message = "Invalid login or password" });
         }
+       
+        //[HttpPost("refresh")]   
+        //public async Task<IActionResult> Refresh(RefreshTokenRequestDTO request)
+        //{
+        //    var tokenResponse = await _authService.RefreshToken(request.RefreshToken);
+        //    if (tokenResponse == null)
+        //        return Unauthorized(new { message = "Invalid refresh token" });
+
+        //    return Ok(tokenResponse);
+        //}
+
     }
 }

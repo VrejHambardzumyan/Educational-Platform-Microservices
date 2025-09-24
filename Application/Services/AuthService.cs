@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity.Data;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
 using UserManagementService.Infrastructure;
@@ -16,11 +17,11 @@ namespace UserManagementService.Application.Services
             _tokenService = tokenService;
         }
 
-        public async Task RegisterUser(string userName, string password)
+        public async Task<AuthResponseDTO> RegisterUser(string userName, string password)
         {
             var existingUser = await _userRepository.GetByUserNameAsync(userName);
             if (existingUser != null)
-                throw new Exception("User already exists!");
+                throw new InvalidOperationException($"User with username '{userName}' already exists");
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
@@ -30,15 +31,27 @@ namespace UserManagementService.Application.Services
                 Password = hashedPassword
             };
 
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
             await _userRepository.AddEntity(user);
+           
+            return new AuthResponseDTO
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
         }
 
         public async Task<AuthResponseDTO> LoginUser(string userName, string password)
         {
             var user = await _userRepository.GetByUserNameAsync(userName);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-                throw new Exception("Invalid password");
-           
+                throw new UnauthorizedAccessException("Invalid username or password");
+
+            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
+                throw new UnauthorizedAccessException("Invalid username or password");
+
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 

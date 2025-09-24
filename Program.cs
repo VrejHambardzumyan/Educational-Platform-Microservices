@@ -21,7 +21,10 @@ namespace UserManagementService
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            //builder.Services.AddScoped<IUserRepository, MockUserRepository>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddSingleton<RSATokenService>();
 
             builder.Services.AddOpenApi();
 

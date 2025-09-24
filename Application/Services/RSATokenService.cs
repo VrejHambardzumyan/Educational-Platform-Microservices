@@ -12,6 +12,8 @@ namespace UserManagementService.Application.Services
     public class RSATokenService : ITokenService
     {
         private readonly IConfiguration _config;
+        private readonly RSA _rsaPrivate;
+        private readonly RSA _rsaPublic;
         private readonly RsaSecurityKey _privateKey;
         private readonly RsaSecurityKey _publicKey;
 
@@ -20,13 +22,13 @@ namespace UserManagementService.Application.Services
         {
             _config = configuration;
 
-            using var rsaPrivate = RSA.Create();
-            rsaPrivate.ImportFromPem(File.ReadAllText(_config["Jwt:PrivateKeyPath"]));
-            _privateKey = new RsaSecurityKey(rsaPrivate);
+            _rsaPrivate = RSA.Create();
+            _rsaPrivate.ImportFromPem(File.ReadAllText(_config["Jwt:PrivateKeyPath"]!));
+            _privateKey = new RsaSecurityKey(_rsaPrivate);
 
-            using var rsaPublic = RSA.Create();
-            rsaPublic.ImportFromPem(File.ReadAllText(_config["Jwt:PublicKeyPath"]));
-            _publicKey = new RsaSecurityKey(rsaPublic);
+            _rsaPublic = RSA.Create();
+            _rsaPublic.ImportFromPem(File.ReadAllText(_config["Jwt:PublicKeyPath"]!));
+            _publicKey = new RsaSecurityKey(_rsaPublic);
         }
         public string GenerateAccessToken(User user)
         {
@@ -54,6 +56,11 @@ namespace UserManagementService.Application.Services
             return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
         }
 
-        public SecurityKey GetPublicKey() => _publicKey; 
+        public SecurityKey GetPublicKey() => _publicKey;
+        public void Dispose()
+        {
+            _rsaPrivate?.Dispose();
+            _rsaPublic?.Dispose();
+        }
     }
 }
