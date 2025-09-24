@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
 using UserManagementService.Infrastructure;
+using UserManagementService.Infrastructure.Entities;
 using UserManagementService.Infrastructure.Interfaces;
 namespace UserManagementService.Application.Services
 {

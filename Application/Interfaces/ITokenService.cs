@@ -1,4 +1,5 @@
 ﻿using UserManagementService.Infrastructure;
+using UserManagementService.Infrastructure.Entities;
 
 namespace UserManagementService.Application.Interfaces
 {

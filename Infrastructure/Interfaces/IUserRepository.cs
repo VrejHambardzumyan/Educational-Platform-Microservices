@@ -1,4 +1,6 @@
-﻿namespace UserManagementService.Infrastructure.Interfaces
+﻿using UserManagementService.Infrastructure.Entities;
+
+namespace UserManagementService.Infrastructure.Interfaces
 {
     public interface IUserRepository
     {

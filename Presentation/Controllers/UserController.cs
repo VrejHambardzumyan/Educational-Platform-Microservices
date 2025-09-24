@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
-using UserManagementService.Presentation;
 
 namespace UserManagementService.Presentation.Controllers
 {
     [ApiController]
-    [Route("[controller]")]  
+    [Route("[controller]")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;

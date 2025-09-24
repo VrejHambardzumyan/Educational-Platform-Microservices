@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UserManagementService.Infrastructure.Entities;
 using UserManagementService.Infrastructure.Interfaces;
 
 namespace UserManagementService.Infrastructure.Repositories

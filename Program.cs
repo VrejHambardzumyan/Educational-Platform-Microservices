@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using System.Security.Cryptography;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Services;
 using UserManagementService.Infrastructure;
@@ -20,11 +15,12 @@ namespace UserManagementService
 
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            //builder.Services.AddScoped<IUserRepository, MockUserRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddSingleton<RSATokenService>();
+            builder.Services.AddSingleton<ITokenService, RSATokenService>();
+
+            // builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddSingleton<IUserRepository, MockUserRepository>();
 
             builder.Services.AddOpenApi();
 
@@ -34,29 +30,31 @@ namespace UserManagementService
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
             builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            var publicKeyPath = builder.Configuration["JwtSettings:PublicKeyPath"];
-            Console.WriteLine($"DEBUG: PublicKeyPath = {publicKeyPath}");
+            var privateKeyPath = builder.Configuration["JwtSettings:PrivateKeyPath"];
+            //Console.WriteLine($"DEBUG: PrivateKeyPath = {privateKeyPath}");
 
-            if (string.IsNullOrEmpty(publicKeyPath))
-                throw new Exception("Public key path not found in configuration.");
+            if (string.IsNullOrEmpty(privateKeyPath))
+                throw new Exception("Private key path not found in configuration.");
 
-            using var rsa = RSA.Create();
-            rsa.ImportFromPem(File.ReadAllText(publicKeyPath));
+            ///for Jwt validation, must be in another service
 
-            builder.Services
-                .AddAuthentication("Bearer")
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new RsaSecurityKey(rsa)
-                    };
-                });
+            //using var rsa = RSA.Create();
+            //rsa.ImportFromPem(File.ReadAllText(PublicKeyPath));
+
+            //builder.Services
+            //    .AddAuthentication("Bearer")
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,
+            //            ValidateAudience = true,
+            //            ValidateIssuerSigningKey = true,
+            //            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            //            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            //            IssuerSigningKey = new RsaSecurityKey(rsa)
+            //        };
+            //    });
 
             var app = builder.Build();
 

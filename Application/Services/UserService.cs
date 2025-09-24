@@ -1,8 +1,7 @@
 ﻿using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
-using UserManagementService.Infrastructure;
+using UserManagementService.Infrastructure.Entities;
 using UserManagementService.Infrastructure.Interfaces;
-using UserManagementService.Infrastructure.Repositories;
 
 namespace UserManagementService.Application.Services
 {
@@ -12,7 +11,8 @@ namespace UserManagementService.Application.Services
 
         public async Task AddUser(UserDTO userModel)
         {
-            User user = new() { 
+            User user = new()
+            {
                 UserName = userModel.Name,
                 Email = userModel.Email,
                 Password = userModel.Password,
