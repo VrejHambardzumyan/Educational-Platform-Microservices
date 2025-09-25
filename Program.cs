@@ -27,7 +27,7 @@ namespace UserManagementService
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
             builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
             var privateKeyPath = builder.Configuration["JwtSettings:PrivateKeyPath"];

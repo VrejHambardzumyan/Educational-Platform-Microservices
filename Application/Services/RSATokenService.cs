@@ -1,31 +1,33 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Infrastructure.Entities;
+using UserManagementService.Presentation.JwtOption;
 
 namespace UserManagementService.Application.Services
 {
     //ToDo - Research the topic about JWT token(access and refresh token) generations
     public class RSATokenService : ITokenService
     {
-        private readonly IConfiguration _config;
+        private readonly JwtOptions _options;
         private readonly RSA _rsaPrivate;
         //private readonly RSA _rsaPublic;
         private readonly RsaSecurityKey _privateKey;
         //private readonly RsaSecurityKey _publicKey;
 
 
-        public RSATokenService(IConfiguration configuration)
+        public RSATokenService(IOptions<JwtOptions> options)
         {
-            _config = configuration;
+            _options = options.Value;
 
-            if (string.IsNullOrEmpty(_config["JwtSettings:PrivateKeyPath"]))
+            if (string.IsNullOrEmpty(_options.PrivateKeyPath))
                 throw new Exception("Private key path not configured");
 
             _rsaPrivate = RSA.Create();
-            _rsaPrivate.ImportFromPem(File.ReadAllText(_config["JwtSettings:PrivateKeyPath"]!));
+            _rsaPrivate.ImportFromPem(File.ReadAllText(_options.PrivateKeyPath));
             _privateKey = new RsaSecurityKey(_rsaPrivate);
 
             //if (string.IsNullOrEmpty(_config["Jwt:PublicKeyPath"]))
@@ -45,8 +47,8 @@ namespace UserManagementService.Application.Services
             var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _config["JwtSettings:Issuer"],
-                audience: _config["JwtSettings:Audience"],
+                issuer: _options.Issuer,
+                audience: _options.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
