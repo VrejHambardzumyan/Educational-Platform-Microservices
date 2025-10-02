@@ -16,13 +16,15 @@ namespace CourseCatalogService
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddPostgresDbContext(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
-            builder.Services.AddSingleton<ICourseRepository, MockCoursesRepository>();
+            //builder.Services.AddSingleton<ICourseRepository, MockCoursesRepository>();
+         
             builder.Services.AddOpenApi();
-
 
             var app = builder.Build();
           

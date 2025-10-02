@@ -18,7 +18,7 @@ namespace UserManagementService.Application.Services
             _tokenService = tokenService;
         }
 
-        public async Task<AuthResponseDTO> RegisterUser(string userName, string password)
+        public async Task<AuthResponseDto> RegisterUserAsync(string userName, string password, string email)
         {
             var existingUser = await _userRepository.GetByUserNameAsync(userName);
             if (existingUser != null)
@@ -29,22 +29,24 @@ namespace UserManagementService.Application.Services
             var user = new User
             {
                 UserName = userName,
-                Password = hashedPassword
+                Password = hashedPassword,
+                Email = email
+
             };
 
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            await _userRepository.AddEntity(user);
+            await _userRepository.AddEntityAsync(user);
            
-            return new AuthResponseDTO
+            return new AuthResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
             };
         }
 
-        public async Task<AuthResponseDTO> LoginUser(string userName, string password)
+        public async Task<AuthResponseDto> LoginUserAsync(string userName, string password)
         {
             var user = await _userRepository.GetByUserNameAsync(userName);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
@@ -56,7 +58,7 @@ namespace UserManagementService.Application.Services
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            return new AuthResponseDTO
+            return new AuthResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken

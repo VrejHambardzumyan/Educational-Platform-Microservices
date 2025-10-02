@@ -19,8 +19,8 @@ namespace UserManagementService
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<ITokenService, RSATokenService>();
 
-            // builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddSingleton<IUserRepository, MockUserRepository>();
+             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            //builder.Services.AddSingleton<IUserRepository, MockUserRepository>();
 
             builder.Services.AddOpenApi();
 

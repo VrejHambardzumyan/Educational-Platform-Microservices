@@ -8,13 +8,11 @@ namespace CourseCatalogService.Infrastructure.Repositories
     {
         public readonly CourseDbContext _context = dbContext;
 
-
         public async Task<Course> AddEntityAsync(Course course)
         {
-                
-            //_context.Courses.Add(entity);
 
-            //await _context.SaveChangesAsync();
+            _context.Courses.Add(course);
+            await _context.SaveChangesAsync();
             return course;
         }
 

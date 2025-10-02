@@ -13,7 +13,7 @@ namespace UserManagementService.Infrastructure.Repositories
             return Task.FromResult(user);
         }
 
-        public Task AddEntity(User entity)
+        public Task AddEntityAsync(User entity)
         {
             _user[entity.UserName] = entity;
             return Task.CompletedTask;

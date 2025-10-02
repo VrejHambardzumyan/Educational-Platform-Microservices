@@ -4,7 +4,7 @@ namespace UserManagementService.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDTO> RegisterUser(string userName, string password);
-        Task<AuthResponseDTO> LoginUser(string userName, string password);
+        Task<AuthResponseDto> RegisterUserAsync(string userName, string password, string email);
+        Task<AuthResponseDto> LoginUserAsync(string userName, string password);
     }
 }

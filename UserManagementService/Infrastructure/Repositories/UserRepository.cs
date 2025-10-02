@@ -8,12 +8,11 @@ namespace UserManagementService.Infrastructure.Repositories
     {
         private readonly UserDbContext _context = dbContext;
         
-        public async Task AddEntity(User entity)
+        public async Task AddEntityAsync(User entity)
 
         {
-            //_context.Users.Add(entity);
-
-            //await _context.SaveChangesAsync();
+            _context.Users.Add(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<User?> GetByUserNameAsync(string userName)

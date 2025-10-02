@@ -18,10 +18,10 @@ namespace UserManagementService.Presentation.Controllers
             _logger = logger;
         }
 
-        [HttpPost(Name = "AddUser")]
-        public async Task<IActionResult> AddUser(UserDTO user)
+        [HttpPost("AddUser")]
+        public async Task<IActionResult> AddUser(UserDto user)
         {
-            await _userService.AddUser(user);
+            await _userService.AddUserAsync(user);
             return Ok();
         }
     }

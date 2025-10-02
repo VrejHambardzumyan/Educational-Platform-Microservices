@@ -17,16 +17,16 @@ namespace UserManagementService.Presentation.Controllers
         }
 
         [HttpPost("signUp")]
-        public async Task<IActionResult> SignUp(SignUpRequestDTO request)
+        public async Task<IActionResult> SignUp(SignUpRequestDto request)
         {
-            var tokenResponse  = await _authService.RegisterUser(request.UserName, request.Password);
+            var tokenResponse  = await _authService.RegisterUserAsync(request.UserName, request.Password, request.Email);
             return Ok(tokenResponse);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(SignInRequestDTO request)
+        public async Task<IActionResult> Login(SignInRequestDto request)
         {
-           var tokenResponse =  await _authService.LoginUser(request.UserName, request.Password);
+           var tokenResponse =  await _authService.LoginUserAsync(request.UserName, request.Password);
             if (tokenResponse != null)
             {
                 return Ok(tokenResponse);
