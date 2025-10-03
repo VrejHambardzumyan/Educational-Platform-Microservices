@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CourseCatalogService.Application.Services
 {
+
     public class CourseService(ICourseRepository courseRepo) : ICourseService
     {
         private readonly ICourseRepository _courseRepo = courseRepo;
 
-        public async Task<CourseResponseDTO> AddCourseAsync(CourseRequestDTO courseRequestDto)
+        public async Task<CourseResponseDto> AddCourseAsync(CourseRequestDto courseRequestDto)
         {
             var course = new Course
             {
@@ -21,7 +22,7 @@ namespace CourseCatalogService.Application.Services
             };
             var created  = await _courseRepo.AddEntityAsync(course);
 
-            return new CourseResponseDTO
+            return new CourseResponseDto
             {
                 Id = created.Id,
                 Title = created.Title,
@@ -30,10 +31,10 @@ namespace CourseCatalogService.Application.Services
             };
         }
 
-        public async Task<IEnumerable<CourseResponseDTO>> GetCoursesAsync()
+        public async Task<IEnumerable<CourseResponseDto>> GetCoursesAsync()
         {
             var courses = await _courseRepo.GetAllCoursesAsync();
-            return courses.Select(c => new CourseResponseDTO
+            return courses.Select(c => new CourseResponseDto
             {
                 Id = c.Id,
                 Title = c.Title,
@@ -43,10 +44,10 @@ namespace CourseCatalogService.Application.Services
 
         }
 
-        public async Task<CourseResponseDTO?> GetCourseByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<CourseResponseDto?> GetCourseByIdAsync(int id, CancellationToken cancellationToken)
         {
             var courses = await _courseRepo.GetCourseByIdAsync(id, cancellationToken);
-            return new CourseResponseDTO
+            return new CourseResponseDto
             {
                 Id = courses.Id,
                 Title = courses.Title,

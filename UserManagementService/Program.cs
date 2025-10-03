@@ -1,4 +1,8 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using System.Reflection;
 using UserManagementService.Application.Interfaces;
+using UserManagementService.Application.ModelValidation;
 using UserManagementService.Application.Services;
 using UserManagementService.Infrastructure;
 using UserManagementService.Infrastructure.Interfaces;
@@ -19,8 +23,13 @@ namespace UserManagementService
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<ITokenService, RSATokenService>();
 
-             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             //builder.Services.AddSingleton<IUserRepository, MockUserRepository>();
+
+            builder.Services.AddFluentValidationAutoValidation()
+                            .AddFluentValidationClientsideAdapters();
+            builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
 
             builder.Services.AddOpenApi();
 

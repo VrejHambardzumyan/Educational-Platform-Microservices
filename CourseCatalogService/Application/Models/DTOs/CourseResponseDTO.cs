@@ -1,6 +1,6 @@
 ﻿namespace CourseCatalogService.Application.Models.DTOs
 {
-    public class CourseResponseDTO
+    public class CourseResponseDto
     {
         public int Id { get; init; }
         public required string Title { get; init; }

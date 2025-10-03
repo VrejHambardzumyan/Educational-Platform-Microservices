@@ -1,12 +1,14 @@
 ﻿using CourseCatalogService.Application.Models.DTOs;
 using CourseCatalogService.Infrastructure.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CourseCatalogService.Application.Interfaces
 {
     public interface ICourseService
     {
-        public Task<CourseResponseDTO> AddCourseAsync(CourseRequestDTO courseRequestDto);
-        public Task<IEnumerable<CourseResponseDTO>> GetCoursesAsync();
-        public Task<CourseResponseDTO?> GetCourseByIdAsync(int id, CancellationToken cancellationToken);
+        public Task<CourseResponseDto> AddCourseAsync(CourseRequestDto courseRequestDto);
+        public Task<IEnumerable<CourseResponseDto>> GetCoursesAsync();
+        public Task<CourseResponseDto?> GetCourseByIdAsync(int id, CancellationToken cancellationToken);
     }
 }

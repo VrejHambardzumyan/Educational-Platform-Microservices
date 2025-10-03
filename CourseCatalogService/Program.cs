@@ -1,4 +1,6 @@
-
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using System.Reflection;
 using CourseCatalogService.Application.Interfaces;
 using CourseCatalogService.Application.Services;
 using CourseCatalogService.Infrastructure;
@@ -23,7 +25,12 @@ namespace CourseCatalogService
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
             //builder.Services.AddSingleton<ICourseRepository, MockCoursesRepository>();
-         
+
+
+            builder.Services.AddFluentValidationAutoValidation()
+                            .AddFluentValidationClientsideAdapters();
+            builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
             builder.Services.AddOpenApi();
 
             var app = builder.Build();

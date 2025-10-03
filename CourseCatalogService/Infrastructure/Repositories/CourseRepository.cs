@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using CourseCatalogService.Infrastructure.Entities;
+﻿using CourseCatalogService.Infrastructure.Entities;
 using CourseCatalogService.Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CourseCatalogService.Infrastructure.Repositories
 {
@@ -15,7 +16,6 @@ namespace CourseCatalogService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return course;
         }
-
         public async Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Courses.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

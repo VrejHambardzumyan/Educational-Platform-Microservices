@@ -13,7 +13,7 @@ namespace UserManagementService.Infrastructure.Configuration
             builder.HasKey(u => u.Id);
             
             builder.Property(u => u.UserName)
-                .HasColumnName("userName")
+                .HasColumnName("UserName")
                 .IsRequired()
                 .HasMaxLength(30);
 

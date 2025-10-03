@@ -18,7 +18,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPost("AddCourse")]
-        public async Task<IActionResult> AddCourse([FromBody] CourseRequestDTO dto)
+        public async Task<IActionResult> AddCourse([FromBody] CourseRequestDto dto)
         {
             var created = await _courseService.AddCourseAsync(dto);
             return Ok(created);
