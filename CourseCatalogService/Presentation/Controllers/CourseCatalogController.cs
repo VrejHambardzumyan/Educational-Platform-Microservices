@@ -32,7 +32,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet("GetCourseByName")]
-        public async Task<IActionResult> GetCourse(string courseName, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCourse([FromQuery] string courseName, CancellationToken cancellationToken)
         {
             var course = await _courseService.GetCourseByNameAsync(courseName, cancellationToken);
             if (course == null) return NotFound();

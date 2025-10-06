@@ -10,7 +10,7 @@ namespace UserManagementService.Infrastructure.Repositories
         
         public async Task AddEntityAsync(User entity)
 
-        {
+                {
             _context.Users.Add(entity);
             await _context.SaveChangesAsync();
         }
