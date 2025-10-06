@@ -13,14 +13,4 @@ namespace CourseCatalogService.Infrastructure
             modelBuilder.ApplyConfiguration(new CourseConfiguration());
         }
     }
-
-    //public class CourseDbContext(DbContextOptions<CourseDbContext> options) : DbContext(options)
-    //{
-    //    public DbSet<Course> Courses { get; set; }
-
-    //    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    //    {
-    //        modelBuilder.ApplyConfiguration(new CourseConfiguration());
-    //    }
-    //}
 }   

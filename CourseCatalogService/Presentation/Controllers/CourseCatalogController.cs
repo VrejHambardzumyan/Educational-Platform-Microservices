@@ -31,10 +31,10 @@ namespace CourseCatalogService.Presentation.Controllers
             return Ok(courses);
         }
 
-        [HttpGet("GetCourseById")]
-        public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
+        [HttpGet("GetCourseByName")]
+        public async Task<IActionResult> GetCourse(string courseName, CancellationToken cancellationToken)
         {
-            var course = await _courseService.GetCourseByIdAsync(id, cancellationToken);
+            var course = await _courseService.GetCourseByNameAsync(courseName, cancellationToken);
             if (course == null) return NotFound();
             return Ok(course);
         }

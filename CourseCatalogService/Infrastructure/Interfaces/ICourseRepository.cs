@@ -6,6 +6,6 @@ namespace CourseCatalogService.Infrastructure.Interfaces
     {
         Task <Course> AddEntityAsync (Course entity);
         Task<IEnumerable<Course>> GetAllCoursesAsync();
-        Task<Course?> GetCourseByIdAsync (int id, CancellationToken cancellationToken);
+        Task<Course?> GetCourseByNameAsync (string courseName, CancellationToken cancellationToken);
     }
 }
