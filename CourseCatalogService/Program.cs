@@ -6,6 +6,7 @@ using CourseCatalogService.Application.Services;
 using CourseCatalogService.Infrastructure;
 using CourseCatalogService.Infrastructure.Interfaces;
 using CourseCatalogService.Infrastructure.Repositories;
+using CourseCatalogService.Infrastructure.Configuration;
 
 namespace CourseCatalogService
 {
@@ -16,11 +17,14 @@ namespace CourseCatalogService
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddJwtAuthentication(builder.Configuration);
 
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+
 
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();

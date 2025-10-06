@@ -29,11 +29,11 @@ namespace UserManagementService.Application.Services
             _rsaPrivate = RSA.Create();
             _rsaPrivate.ImportFromPem(File.ReadAllText(_options.PrivateKeyPath));
             _privateKey = new RsaSecurityKey(_rsaPrivate);
-
-            //if (string.IsNullOrEmpty(_config["Jwt:PublicKeyPath"]))
+            //_options = options.Value
+            //if (string.IsNullOrEmpty(_options.PublicKeyPath))
             //    throw new Exception("Public key path not configured");
             //_rsaPublic = RSA.Create();
-            //_rsaPublic.ImportFromPem(File.ReadAllText(_config["Jwt:PublicKeyPath"]!));
+            //_rsaPublic.ImportFromPem(File.ReadAllText(_options.PublicKeyPath));
             //_publicKey = new RsaSecurityKey(_rsaPublic);
         }
         public string GenerateAccessToken(User user)

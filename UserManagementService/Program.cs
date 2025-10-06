@@ -45,26 +45,6 @@ namespace UserManagementService
             if (string.IsNullOrEmpty(privateKeyPath))
                 throw new Exception("Private key path not found in configuration.");
 
-            ///for Jwt validation, must be in another service
-
-            //using var rsa = RSA.Create();
-            //rsa.ImportFromPem(File.ReadAllText(PublicKeyPath));
-
-            //builder.Services
-            //    .AddAuthentication("Bearer")
-            //    .AddJwtBearer(options =>
-            //    {
-            //        options.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            ValidateIssuer = true,
-            //            ValidateAudience = true,
-            //            ValidateIssuerSigningKey = true,
-            //            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            //            ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            //            IssuerSigningKey = new RsaSecurityKey(rsa)
-            //        };
-            //    });
-
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
