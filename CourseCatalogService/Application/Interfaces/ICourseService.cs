@@ -9,6 +9,6 @@ namespace CourseCatalogService.Application.Interfaces
     {
         public Task<CourseResponseDto> AddCourseAsync(CourseRequestDto courseRequestDto);
         public Task<IEnumerable<CourseResponseDto>> GetCoursesAsync();
-        public Task<CourseResponseDto?> GetCourseByNameAsync(string courseName, CancellationToken cancellationToken);
+        public Task<CourseResponseDto?> GetCourseByNameAsync(int id, CancellationToken cancellationToken);
     }
 }

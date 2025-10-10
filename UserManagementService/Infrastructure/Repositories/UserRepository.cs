@@ -9,8 +9,7 @@ namespace UserManagementService.Infrastructure.Repositories
         private readonly UserDbContext _context = dbContext;
         
         public async Task AddEntityAsync(User entity)
-
-                {
+        {
             _context.Users.Add(entity);
             await _context.SaveChangesAsync();
         }

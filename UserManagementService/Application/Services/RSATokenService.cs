@@ -9,7 +9,6 @@ using UserManagementService.Presentation.JwtOption;
 
 namespace UserManagementService.Application.Services
 {
-    //ToDo - Research the topic about JWT token(access and refresh token) generations
     public class RSATokenService : ITokenService
     {
         private readonly JwtOptions _options;
@@ -27,7 +26,7 @@ namespace UserManagementService.Application.Services
                 throw new Exception("Private key path not configured");
 
             _rsaPrivate = RSA.Create();
-            _rsaPrivate.ImportFromPem(File.ReadAllText(_options.PrivateKeyPath));
+            _rsaPrivate.ImportFromPem(File.ReadAllText(_options.PrivateKeyPath));   
             _privateKey = new RsaSecurityKey(_rsaPrivate);
             //_options = options.Value
             //if (string.IsNullOrEmpty(_options.PublicKeyPath))

@@ -44,9 +44,9 @@ namespace CourseCatalogService.Application.Services
 
         }
 
-        public async Task<CourseResponseDto?> GetCourseByNameAsync(string courseName, CancellationToken cancellationToken)
+        public async Task<CourseResponseDto?> GetCourseByNameAsync(int id, CancellationToken cancellationToken)
         {
-            var courses = await _courseRepo.GetCourseByNameAsync(courseName, cancellationToken);
+            var courses = await _courseRepo.GetCourseByIdAsync(id, cancellationToken);
             if (courses == null)
                 return null;
             return new CourseResponseDto

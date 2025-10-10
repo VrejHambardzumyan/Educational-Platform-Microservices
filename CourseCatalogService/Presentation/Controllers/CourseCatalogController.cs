@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CourseCatalogService.Application.Models.DTOs;
 using CourseCatalogService.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseCatalogService.Presentation.Controllers
 {
@@ -18,6 +19,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPost("AddCourse")]
+        [Authorize]
         public async Task<IActionResult> AddCourse([FromBody] CourseRequestDto dto)
         {
             var created = await _courseService.AddCourseAsync(dto);
@@ -25,16 +27,18 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet("GetAllCourses")]
+        [Authorize]
         public async Task<IActionResult> GetCourses()
         {
             var courses = await _courseService.GetCoursesAsync();
             return Ok(courses);
         }
 
-        [HttpGet("GetCourseByName")]
-        public async Task<IActionResult> GetCourse([FromQuery] string courseName, CancellationToken cancellationToken)
+        [HttpGet("GetCourseById")]
+        [Authorize]
+        public async Task<IActionResult> GetCourse([FromQuery] int id, CancellationToken cancellationToken)
         {
-            var course = await _courseService.GetCourseByNameAsync(courseName, cancellationToken);
+            var course = await _courseService.GetCourseByNameAsync(id, cancellationToken);
             if (course == null) return NotFound();
             return Ok(course);
         }

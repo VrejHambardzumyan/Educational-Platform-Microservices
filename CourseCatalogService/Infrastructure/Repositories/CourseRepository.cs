@@ -16,9 +16,9 @@ namespace CourseCatalogService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return course;
         }
-        public async Task<Course?> GetCourseByNameAsync(string courseName, CancellationToken cancellationToken = default)
+        public async Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _context.Courses.FirstOrDefaultAsync(x => x.Title == courseName, cancellationToken);
+            return await _context.Courses.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
         public async Task<IEnumerable<Course>> GetAllCoursesAsync()
         {

@@ -6,11 +6,11 @@ namespace CourseCatalogService.Infrastructure.Repositories
 {
     public class MockCoursesRepository : ICourseRepository
     {
-        private readonly ConcurrentDictionary<string, Course> _course = new();
+        private readonly ConcurrentDictionary<int, Course> _course = new();
 
         public Task<Course> AddEntityAsync(Course entity)
         {
-            _course[entity.Title] = entity;
+            _course[entity.Id] = entity;
             return Task.FromResult(entity);
         }
 
@@ -19,9 +19,9 @@ namespace CourseCatalogService.Infrastructure.Repositories
             return Task.FromResult<IEnumerable<Course>>(_course.Values);
         }
 
-        public Task<Course?> GetCourseByNameAsync(string courseName, CancellationToken cancellationToken)
+        public Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken)
         {
-            _course.TryGetValue(courseName, out var course);
+            _course.TryGetValue(id, out var course);
             return Task.FromResult(course);
         }
     }

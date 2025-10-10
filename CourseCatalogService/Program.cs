@@ -1,12 +1,13 @@
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using System.Reflection;
 using CourseCatalogService.Application.Interfaces;
 using CourseCatalogService.Application.Services;
 using CourseCatalogService.Infrastructure;
+using CourseCatalogService.Infrastructure.Configuration;
 using CourseCatalogService.Infrastructure.Interfaces;
 using CourseCatalogService.Infrastructure.Repositories;
-using CourseCatalogService.Infrastructure.Configuration;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace CourseCatalogService
 {
@@ -18,11 +19,44 @@ namespace CourseCatalogService
 
             // Add services to the container.
             builder.Services.AddJwtAuthentication(builder.Configuration);
+            builder.Services.AddAuthorization();
 
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSwaggerGen(c =>
+            { 
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog API", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n " +
+                                  "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n" +
+                                  "Example: \"Bearer eyJhbGciOiJIUzI1NiIs...\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            new string[] {}
+                        }
+                });
+            });
+
 
 
 
@@ -36,9 +70,10 @@ namespace CourseCatalogService
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             builder.Services.AddOpenApi();
+            Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
             var app = builder.Build();
-          
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -50,6 +85,7 @@ namespace CourseCatalogService
                 app.MapOpenApi();
             }
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();
