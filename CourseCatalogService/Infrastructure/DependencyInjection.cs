@@ -10,4 +10,4 @@ namespace CourseCatalogService.Infrastructure
                 options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
         }
     }
-}
+}       

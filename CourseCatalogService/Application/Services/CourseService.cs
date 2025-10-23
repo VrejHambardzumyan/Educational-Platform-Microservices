@@ -2,7 +2,6 @@
 using CourseCatalogService.Application.Models.DTOs;
 using CourseCatalogService.Infrastructure.Entities;
 using CourseCatalogService.Infrastructure.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CourseCatalogService.Application.Services
 {
@@ -20,7 +19,7 @@ namespace CourseCatalogService.Application.Services
                 DurationInMonth = courseRequestDto.DurationInMonth,
                 Price = courseRequestDto.Price,
             };
-            var created  = await _courseRepo.AddEntityAsync(course);
+            var created = await _courseRepo.AddEntityAsync(course);
 
             return new CourseResponseDto
             {
@@ -39,12 +38,12 @@ namespace CourseCatalogService.Application.Services
                 Id = c.Id,
                 Title = c.Title,
                 DurationInMonth = c.DurationInMonth,
-                Price = c.Price,            
+                Price = c.Price,
             });
 
         }
 
-        public async Task<CourseResponseDto?> GetCourseByNameAsync(int id, CancellationToken cancellationToken)
+        public async Task<CourseResponseDto?> GetCourseByIdAsync(int id, CancellationToken cancellationToken)
         {
             var courses = await _courseRepo.GetCourseByIdAsync(id, cancellationToken);
             if (courses == null)

@@ -32,14 +32,14 @@ namespace CourseCatalogService.Infrastructure.Configuration
                         IssuerSigningKey = new RsaSecurityKey(rsa)
                     };
 
-                    #region 
+                    #region JwtDebug
 
                     options.Events = new JwtBearerEvents
                     {
                         OnAuthenticationFailed = context =>
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("❌ JWT Authentication failed:");
+                            Console.WriteLine("JWT Authentication failed:");
                             Console.WriteLine(context.Exception.Message);
                             Console.ResetColor();
 
@@ -51,7 +51,7 @@ namespace CourseCatalogService.Infrastructure.Configuration
                         OnTokenValidated = context =>
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine("✅ Token successfully validated for user: " +
+                            Console.WriteLine("Token successfully validated for user: " +
                                 context.Principal?.Identity?.Name);
                             Console.ResetColor();
                             return Task.CompletedTask;
@@ -60,7 +60,7 @@ namespace CourseCatalogService.Infrastructure.Configuration
                         {
                             var authHeader = context.Request.Headers["Authorization"].ToString();
                             Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine($"🔍 Authorization header received: '{authHeader}'");
+                            Console.WriteLine($"Authorization header received: '{authHeader}'");
                             Console.ResetColor();
 
                             return Task.CompletedTask;

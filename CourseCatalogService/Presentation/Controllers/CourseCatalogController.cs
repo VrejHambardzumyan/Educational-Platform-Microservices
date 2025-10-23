@@ -34,11 +34,11 @@ namespace CourseCatalogService.Presentation.Controllers
             return Ok(courses);
         }
 
-        [HttpGet("GetCourseById")]
+        [HttpGet("GetCourseById/{id}")] 
         [Authorize]
-        public async Task<IActionResult> GetCourse([FromQuery] int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
         {
-            var course = await _courseService.GetCourseByNameAsync(id, cancellationToken);
+            var course = await _courseService.GetCourseByIdAsync(id, cancellationToken);
             if (course == null) return NotFound();
             return Ok(course);
         }
