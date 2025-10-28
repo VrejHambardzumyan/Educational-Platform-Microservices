@@ -69,7 +69,6 @@ namespace CourseCatalogService
                             .AddFluentValidationClientsideAdapters();
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-            builder.Services.AddOpenApi();
             Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
             var app = builder.Build();
@@ -78,11 +77,6 @@ namespace CourseCatalogService
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
             }
             app.UseHttpsRedirection();
             app.UseAuthentication();
