@@ -1,4 +1,4 @@
-﻿namespace CourseEnrollment.Application.ExternalCalls
+﻿namespace CourseEnrollment.Application.ExternalCalls.CouseCatalog
 {
     public class CourseCatalogSettings
     {

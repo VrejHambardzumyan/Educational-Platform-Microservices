@@ -1,6 +1,6 @@
 ﻿namespace CourseEnrollment.Application.Models.DTOs
 {
-    public class CreatEnrollmentRequestDto
+    public class CreateEnrollmentRequestDto
     {
         public int UserId { get; set; }
 

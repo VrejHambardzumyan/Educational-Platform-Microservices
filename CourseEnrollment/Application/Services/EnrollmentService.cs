@@ -1,19 +1,25 @@
 ﻿using CourseEnrollment.Application.ExternalCalls;
+using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
 using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Models.DTOs;
 using CourseEnrollment.Infrastructure;
+using CourseEnrollment.Infrastructure.Repositories;
 using CourseEnrollment.Infrastructure.Entities;
 using CourseEnrollment.Infrastructure.Interfaces;
 using CourseEnrollment.Infrastructure.Status;
+using Microsoft.EntityFrameworkCore;
+using CourseEnrollment.Application.ExternalCalls.Payment;
 
 namespace CourseEnrollment.Application.Services
 {
-    public class EnrollmentService(CourseCatalogClient catalogClient, IEnrollmentRepository enrollmentRepo) : IEnrollmentService
+    public class EnrollmentService(IPaymentServiceClient paymentClient,ICourseCatalogClient catalogClient, IEnrollmentRepository enrollmentRepo) : IEnrollmentService
     {
-        private readonly CourseCatalogClient _catalogClient = catalogClient;
+        private readonly EnrollmentDbContext _context;
+        private readonly IPaymentServiceClient _paymentClient = paymentClient;
+        private readonly ICourseCatalogClient _catalogClient = catalogClient;
         private readonly IEnrollmentRepository _enrollmentRepo = enrollmentRepo;
 
-        public async Task<EnrollmentResponseDto> AddEnrollmentAsync(CreatEnrollmentRequestDto requestDtoEntity, CancellationToken cancellationToken = default)
+        public async Task<EnrollmentResponseDto> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDtoEntity, CancellationToken cancellationToken = default)
         {
             var price = await _catalogClient.GetCoursePriceAsync(requestDtoEntity.CourseId, cancellationToken);
             var enrollment = new EnrollmentEntity
@@ -86,6 +92,31 @@ namespace CourseEnrollment.Application.Services
         public async Task MarkAsPaidAsync(int enrollmentId, CancellationToken cancellationToken = default)
         {
             await _enrollmentRepo.MarkAsPaidAsync(enrollmentId, cancellationToken);
+        }
+
+        public async Task<Guid> InitiatePaymentAsync(int userId)
+        {
+            var draftEnrollments = await _context.Enrollments.Where(e => e.UserId == userId && e.Status == "Draft").ToListAsync();
+
+            if (!draftEnrollments.Any())
+                throw new Exception("No draft enrollment to pay for.");
+
+            var paymentId = Guid.NewGuid();
+
+            foreach (var e in draftEnrollments)
+            {
+                e.PaymentId = paymentId;
+                e.Status = nameof(PaymentStatus.Processing);
+            }
+
+            await _context.SaveChangesAsync();
+
+            var totalAmount = draftEnrollments.Sum(e => e.Amount);
+
+            await _paymentClient.CreatPaymentAsync(userId, paymentId, totalAmount);
+
+            return paymentId;
+
         }
     }
 }

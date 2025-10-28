@@ -42,7 +42,7 @@ namespace CourseEnrollment.Infrastructure.Repositories
 
         }
 
-        public async Task MarkAsPaidAsync(int enrollmentId, DateTime activatedAt, string paymentStatus, CancellationToken cancellationToken = default)
+        public async Task MarkAsPaidAsync(int enrollmentId,CancellationToken cancellationToken = default)
         {
             var enrollment = await GetByIdAsync(enrollmentId, cancellationToken);
 

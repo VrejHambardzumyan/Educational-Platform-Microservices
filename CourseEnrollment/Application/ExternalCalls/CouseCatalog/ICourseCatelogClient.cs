@@ -1,4 +1,4 @@
-﻿namespace CourseEnrollment.Application.Interfaces
+﻿namespace CourseEnrollment.Application.ExternalCalls.CouseCatalog
 {
     public interface ICourseCatalogClient
     {

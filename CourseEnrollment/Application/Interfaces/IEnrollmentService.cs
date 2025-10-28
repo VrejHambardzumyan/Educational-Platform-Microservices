@@ -4,7 +4,7 @@ namespace CourseEnrollment.Application.Interfaces
 {
     public interface IEnrollmentService
     {
-        Task<EnrollmentResponseDto> AddEnrollmentAsync(CreatEnrollmentRequestDto requestDto, CancellationToken cancellationToken = default);
+        Task<EnrollmentResponseDto> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDto, CancellationToken cancellationToken = default);
 
         Task MarkAsPaidAsync(int enrollmentId,CancellationToken cancellationToken = default);
 

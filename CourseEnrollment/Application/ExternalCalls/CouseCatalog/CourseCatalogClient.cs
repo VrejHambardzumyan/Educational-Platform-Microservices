@@ -1,7 +1,6 @@
-﻿using CourseEnrollment.Application.Interfaces;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
-namespace CourseEnrollment.Application.ExternalCalls
+namespace CourseEnrollment.Application.ExternalCalls.CouseCatalog
 {
     public class CourseCatalogClient : ICourseCatalogClient
     {
@@ -17,12 +16,15 @@ namespace CourseEnrollment.Application.ExternalCalls
         {
             var endpoint = _settings.Endpoints.GetCourseById.Replace("{courseId}", courseId.ToString());
 
-            var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            //TODO service-to-service call with OAuth
 
-            var course = await response.Content.ReadFromJsonAsync<CourseCatalogResponse>(cancellationToken: cancellationToken);
+            //var response = await _httpClient.GetAsync(endpoint, cancellationToken);
+            //response.EnsureSuccessStatusCode();
 
-            return course!.Price;
+            //var course = await response.Content.ReadFromJsonAsync<CourseCatalogResponse>(cancellationToken: cancellationToken);
+
+            //return course!.Price;
+            return 5000;
         }
     
         public class CourseCatalogResponse

@@ -1,7 +1,11 @@
-using Microsoft.Extensions.Options;
 using CourseEnrollment.Application.ExternalCalls;
+using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
+using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
-using CourseEnrollment.Application.ExternalCalls;
+using CourseEnrollment.Application.Services;
+using CourseEnrollment.Infrastructure;
+using CourseEnrollment.Infrastructure.Interfaces;
+using CourseEnrollment.Infrastructure.Repositories;
 using Microsoft.Extensions.Options;
 
 namespace CourseEnrollment
@@ -15,32 +19,39 @@ namespace CourseEnrollment
             // Add services to the container.
             builder.Services.Configure<CourseCatalogSettings>(
                     builder.Configuration.GetSection("ExternalServices:CourseCatalog"));
-
             builder.Services.AddHttpClient<ICourseCatalogClient, CourseCatalogClient>((sp, client) =>
             {
                 var settings = sp.GetRequiredService<IOptions<CourseCatalogSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
             });
 
+            builder.Services.Configure<PaymentServiceSettings>(
+                    builder.Configuration.GetSection("ExternalServices:Payment"));
+            builder.Services.AddHttpClient<IPaymentServiceClient, PaymentServiceClient>();
+
+
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddPostgresDbContext(builder.Configuration);
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+            builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+          
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
+
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }

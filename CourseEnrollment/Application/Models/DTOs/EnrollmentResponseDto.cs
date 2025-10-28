@@ -12,6 +12,8 @@
 
         public decimal Amount { get; set; }
 
+        public Guid? PaymentId {  get; set; }
+
         public DateTime? ActivatedAt { get; set; }
 
         public string? Status { get; set; }
