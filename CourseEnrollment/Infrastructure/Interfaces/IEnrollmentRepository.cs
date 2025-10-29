@@ -1,4 +1,5 @@
 ﻿using CourseEnrollment.Infrastructure.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CourseEnrollment.Infrastructure.Interfaces
 {
@@ -13,6 +14,9 @@ namespace CourseEnrollment.Infrastructure.Interfaces
         Task<IEnumerable<EnrollmentEntity>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default);
         
         Task<EnrollmentEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-        
+
+        Task SaveChangesAsync(CancellationToken cancellationToken = default);
+       
+
     }
 }

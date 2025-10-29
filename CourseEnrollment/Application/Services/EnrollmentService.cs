@@ -1,20 +1,17 @@
-﻿using CourseEnrollment.Application.ExternalCalls;
-using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
+﻿using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
+using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Models.DTOs;
 using CourseEnrollment.Infrastructure;
-using CourseEnrollment.Infrastructure.Repositories;
 using CourseEnrollment.Infrastructure.Entities;
 using CourseEnrollment.Infrastructure.Interfaces;
 using CourseEnrollment.Infrastructure.Status;
 using Microsoft.EntityFrameworkCore;
-using CourseEnrollment.Application.ExternalCalls.Payment;
 
 namespace CourseEnrollment.Application.Services
 {
-    public class EnrollmentService(IPaymentServiceClient paymentClient,ICourseCatalogClient catalogClient, IEnrollmentRepository enrollmentRepo) : IEnrollmentService
+    public class EnrollmentService(IPaymentServiceClient paymentClient, ICourseCatalogClient catalogClient, IEnrollmentRepository enrollmentRepo) : IEnrollmentService
     {
-        private readonly EnrollmentDbContext _context;
         private readonly IPaymentServiceClient _paymentClient = paymentClient;
         private readonly ICourseCatalogClient _catalogClient = catalogClient;
         private readonly IEnrollmentRepository _enrollmentRepo = enrollmentRepo;
@@ -37,7 +34,7 @@ namespace CourseEnrollment.Application.Services
             {
                 Id = enrollment.Id,
                 UserId = enrollment.UserId,
-                CourseId =enrollment.CourseId,
+                CourseId = enrollment.CourseId,
                 CreatedAt = enrollment.CreatedAt,
                 Amount = enrollment.Amount,
                 ActivatedAt = enrollment.ActivatedAt,
@@ -94,10 +91,11 @@ namespace CourseEnrollment.Application.Services
             await _enrollmentRepo.MarkAsPaidAsync(enrollmentId, cancellationToken);
         }
 
-        public async Task<Guid> InitiatePaymentAsync(int userId)
+        public async Task<Guid> InitiatePaymentAsync(int userId, CancellationToken cancellationToken)
         {
-            var draftEnrollments = await _context.Enrollments.Where(e => e.UserId == userId && e.Status == "Draft").ToListAsync();
+            var userEnrollments = await _enrollmentRepo.GetAllByUserIdAsync(userId, cancellationToken);
 
+            var draftEnrollments = userEnrollments.Where(e => e.Status == "Draft");
             if (!draftEnrollments.Any())
                 throw new Exception("No draft enrollment to pay for.");
 
@@ -109,11 +107,11 @@ namespace CourseEnrollment.Application.Services
                 e.Status = nameof(PaymentStatus.Processing);
             }
 
-            await _context.SaveChangesAsync();
+            await _enrollmentRepo.SaveChangesAsync(cancellationToken);
 
             var totalAmount = draftEnrollments.Sum(e => e.Amount);
 
-            await _paymentClient.CreatPaymentAsync(userId, paymentId, totalAmount);
+            await _paymentClient.CreatPaymentAsync(userId, paymentId, totalAmount, cancellationToken);
 
             return paymentId;
 
