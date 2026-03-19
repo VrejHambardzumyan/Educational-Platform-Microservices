@@ -13,5 +13,9 @@ namespace CourseEnrollment.Application.Interfaces
         Task<IEnumerable<EnrollmentResponseDto>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default);
 
         Task<EnrollmentResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+  
+        Task<Guid> InitiatePaymentAsync(int userId, CancellationToken cancellationToken = default);
+
+        Task HandlePaymentCallbackAsync(Guid paymentId, bool isSuccess, CancellationToken cancellationToken = default);
     }
 }

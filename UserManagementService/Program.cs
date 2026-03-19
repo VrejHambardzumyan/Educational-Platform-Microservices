@@ -2,12 +2,12 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using System.Reflection;
 using UserManagementService.Application.Interfaces;
+using UserManagementService.Application.Models.JwtOption;
 using UserManagementService.Application.ModelValidation;
 using UserManagementService.Application.Services;
 using UserManagementService.Infrastructure;
 using UserManagementService.Infrastructure.Interfaces;
 using UserManagementService.Infrastructure.Repositories;
-using UserManagementService.Presentation.JwtOption;
 
 namespace UserManagementService
 {
@@ -45,6 +45,14 @@ namespace UserManagementService
             if (string.IsNullOrEmpty(privateKeyPath))
                 throw new Exception("Private key path not found in configuration.");
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                    policy.WithOrigins("http://localhost:5174")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+            });
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -57,6 +65,8 @@ namespace UserManagementService
             {
                 app.MapOpenApi();
             }
+
+            app.UseCors();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();

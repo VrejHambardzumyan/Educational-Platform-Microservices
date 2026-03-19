@@ -10,7 +10,7 @@ namespace CourseCatalogService.Infrastructure.Configuration
     {
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            var publicKey = File.ReadAllText("C:\\Users\\Karen\\public_key.pem");
+            var publicKey = File.ReadAllText("C:\\Users\\ideat\\Documents\\public_key.pem");
             var rsa = RSA.Create();
             rsa.ImportFromPem(publicKey);
 
@@ -44,7 +44,6 @@ namespace CourseCatalogService.Infrastructure.Configuration
                             Console.ResetColor();
 
                             
-                            // Console.WriteLine(context.Exception);
 
                             return Task.CompletedTask;
                         },

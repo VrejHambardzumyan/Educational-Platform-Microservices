@@ -5,7 +5,7 @@
         Draft = 0,
         Processing = 1,
         Completed = 2,
-        Faild = 3,
+        Failed = 3,
         Deleted = 4,
     }
 }

@@ -37,7 +37,14 @@ namespace CourseEnrollment
 
             builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
             builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
-          
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                    policy.WithOrigins("http://localhost:5174")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+            });
 
             var app = builder.Build();
 
@@ -48,7 +55,7 @@ namespace CourseEnrollment
                 app.UseSwaggerUI();
             }
 
-
+            app.UseCors();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();

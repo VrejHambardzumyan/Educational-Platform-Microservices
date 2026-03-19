@@ -59,5 +59,12 @@ namespace CourseEnrollment.Infrastructure.Repositories
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<IEnumerable<EnrollmentEntity>> GetAllByPaymentIdAsync(Guid paymentId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Enrollments
+                .Where(e => e.PaymentId == paymentId)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

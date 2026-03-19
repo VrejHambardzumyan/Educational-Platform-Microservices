@@ -25,7 +25,12 @@ namespace UserManagementService.Infrastructure.Configuration
                 .IsRequired();
 
             builder.HasIndex(u => u.UserName)
-                    .IsUnique();
+                 .IsUnique();
+
+            builder.Property(u => u.Role)
+                .HasColumnName("Role")
+                .HasDefaultValue("User")
+                .IsRequired();
         }
     }
 }

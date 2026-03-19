@@ -1,4 +1,4 @@
-﻿namespace UserManagementService.Presentation.JwtOption
+﻿namespace UserManagementService.Application.Models.JwtOption
 {
     public class JwtOptions
     {

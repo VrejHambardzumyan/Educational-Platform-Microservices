@@ -19,28 +19,49 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPost("AddCourse")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> AddCourse([FromBody] CourseRequestDto dto)
         {
-            var created = await _courseService.AddCourseAsync(dto);
-            return Ok(created);
+            try
+            {
+                var created = await _courseService.AddCourseAsync(dto);
+                return Ok(created);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to add course.", detail = ex.Message });
+            }
         }
 
         [HttpGet("GetAllCourses")]
         [Authorize]
         public async Task<IActionResult> GetCourses()
         {
-            var courses = await _courseService.GetCoursesAsync();
-            return Ok(courses);
+            try
+            {
+                var courses = await _courseService.GetCoursesAsync();
+                return Ok(courses ?? Enumerable.Empty<CourseResponseDto>());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve courses.", detail = ex.Message });
+            }
         }
 
-        [HttpGet("GetCourseById/{id}")] 
-        [Authorize]
+        [HttpGet("GetCourseById/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
         {
-            var course = await _courseService.GetCourseByIdAsync(id, cancellationToken);
-            if (course == null) return NotFound();
-            return Ok(course);
+            try
+            {
+                var course = await _courseService.GetCourseByIdAsync(id, cancellationToken);
+                if (course == null) return NotFound(new { message = $"Course with ID {id} not found." });
+                return Ok(course);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve course.", detail = ex.Message });
+            }
         }
     }
 }

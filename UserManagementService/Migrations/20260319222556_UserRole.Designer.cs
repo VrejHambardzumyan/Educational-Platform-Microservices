@@ -11,8 +11,8 @@ using UserManagementService.Infrastructure;
 namespace UserManagementService.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20251002102302_RemovedPasswordConstraint")]
-    partial class RemovedPasswordConstraint
+    [Migration("20260319222556_UserRole")]
+    partial class UserRole
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,11 +41,18 @@ namespace UserManagementService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("User")
+                        .HasColumnName("Role");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
-                        .HasColumnName("userName");
+                        .HasColumnName("UserName");
 
                     b.HasKey("Id");
 

@@ -116,5 +116,27 @@ namespace CourseEnrollment.Application.Services
             return paymentId;
 
         }
+        public async Task HandlePaymentCallbackAsync(Guid paymentId, bool isSuccess, CancellationToken cancellationToken = default)
+        {
+            var enrollments = await _enrollmentRepo.GetAllByPaymentIdAsync(paymentId, cancellationToken);
+
+            if (!enrollments.Any())
+                throw new KeyNotFoundException($"No enrollments found for PaymentId {paymentId}");
+
+            foreach (var enrollment in enrollments)
+            {
+                if (isSuccess)
+                {
+                    enrollment.Status = nameof(PaymentStatus.Completed);
+                    enrollment.ActivatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    enrollment.Status = nameof(PaymentStatus.Failed);
+                }
+            }
+
+            await _enrollmentRepo.SaveChangesAsync(cancellationToken);
+        }
     }
 }

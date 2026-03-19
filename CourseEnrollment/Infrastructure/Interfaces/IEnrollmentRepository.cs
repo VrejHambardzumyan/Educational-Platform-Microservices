@@ -16,7 +16,7 @@ namespace CourseEnrollment.Infrastructure.Interfaces
         Task<EnrollmentEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
-       
 
+        Task<IEnumerable<EnrollmentEntity>> GetAllByPaymentIdAsync(Guid paymentId, CancellationToken cancellationToken = default);
     }
 }

@@ -19,30 +19,48 @@ namespace UserManagementService.Presentation.Controllers
         [HttpPost("signUp")]
         public async Task<IActionResult> SignUp(SignUpRequestDto request)
         {
-            var tokenResponse  = await _authService.RegisterUserAsync(request.UserName, request.Password, request.Email);
-            return Ok(tokenResponse);
+            try
+            {
+                var tokenResponse = await _authService.RegisterUserAsync(request.UserName, request.Password, request.Email);
+                return Ok(tokenResponse);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Registration failed.", detail = ex.Message });
+            }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(SignInRequestDto request)
         {
-           var tokenResponse =  await _authService.LoginUserAsync(request.UserName, request.Password);
-            if (tokenResponse != null)
+            try
             {
+                var tokenResponse = await _authService.LoginUserAsync(request.UserName, request.Password);
                 return Ok(tokenResponse);
             }
-            return Unauthorized(new { message = "Invalid login or password" });
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Login failed.", detail = ex.Message });
+            }
+
+            //[HttpPost("refresh")]   
+            //public async Task<IActionResult> Refresh(RefreshTokenRequestDTO request)
+            //{
+            //    var tokenResponse = await _authService.RefreshToken(request.RefreshToken);
+            //    if (tokenResponse == null)
+            //        return Unauthorized(new { message = "Invalid refresh token" });
+
+            //    return Ok(tokenResponse);
+            //}
+
         }
-       
-        //[HttpPost("refresh")]   
-        //public async Task<IActionResult> Refresh(RefreshTokenRequestDTO request)
-        //{
-        //    var tokenResponse = await _authService.RefreshToken(request.RefreshToken);
-        //    if (tokenResponse == null)
-        //        return Unauthorized(new { message = "Invalid refresh token" });
-
-        //    return Ok(tokenResponse);
-        //}
-
     }
 }

@@ -42,7 +42,8 @@ namespace UserManagementService.Application.Services
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                UserId = user.Id
             };
         }
 
@@ -61,7 +62,8 @@ namespace UserManagementService.Application.Services
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                UserId = user.Id
             };
         }
 

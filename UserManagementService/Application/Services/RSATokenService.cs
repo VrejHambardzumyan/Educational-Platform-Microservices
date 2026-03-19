@@ -4,8 +4,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using UserManagementService.Application.Interfaces;
+using UserManagementService.Application.Models.JwtOption;
 using UserManagementService.Infrastructure.Entities;
-using UserManagementService.Presentation.JwtOption;
 
 namespace UserManagementService.Application.Services
 {
@@ -40,7 +40,8 @@ namespace UserManagementService.Application.Services
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, user.Role ?? "User")
             };
 
             var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256);
