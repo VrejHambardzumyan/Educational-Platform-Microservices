@@ -28,7 +28,6 @@ namespace CourseEnrollment.Application.ExternalCalls.CouseCatalog
             var course = await response.Content.ReadFromJsonAsync<CourseCatalogResponse>(cancellationToken: cancellationToken);
 
             return course!.Price;
-            //return 5000;
         }
 
         private static string GenerateServiceToken()

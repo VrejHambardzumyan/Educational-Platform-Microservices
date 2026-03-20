@@ -32,7 +32,6 @@ namespace CourseEnrollment.Presentation.Controllers
             }
         }
 
-        // REPLACE BOTH:
         [HttpPut("Activate/{id}")]
         public async Task<IActionResult> ActivateAsync(int id, CancellationToken cancellationToken)
         {
