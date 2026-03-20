@@ -51,15 +51,15 @@ namespace CourseEnrollment
             });
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.MapOpenApi();
             }
 
-            app.UseCors();
-            app.UseHttpsRedirection();
+            app.UseCors("AllowFrontend");
+            // app.UseHttpsRedirection();  
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

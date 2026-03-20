@@ -56,22 +56,17 @@ namespace UserManagementService
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
-
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
                 app.MapOpenApi();
             }
 
-            app.UseCors();
-            app.UseHttpsRedirection();
+            app.UseCors("AllowFrontend");
+            // app.UseHttpsRedirection();  
             app.UseAuthorization();
             app.MapControllers();
             app.Run();
