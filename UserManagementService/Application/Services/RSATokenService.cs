@@ -41,7 +41,8 @@ namespace UserManagementService.Application.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, user.Role ?? "User")
+                new Claim("userId", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role ?? "Student")
             };
 
             var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256);
@@ -59,7 +60,10 @@ namespace UserManagementService.Application.Services
 
         public string GenerateRefreshToken()
         {
-            return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            var randomBytes = new byte[64];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
 
         //public SecurityKey GetPublicKey() => _publicKey;

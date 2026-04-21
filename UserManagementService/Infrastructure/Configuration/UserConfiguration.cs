@@ -29,8 +29,16 @@ namespace UserManagementService.Infrastructure.Configuration
 
             builder.Property(u => u.Role)
                 .HasColumnName("Role")
-                .HasDefaultValue("User")
+                .HasDefaultValue("Student")
                 .IsRequired();
+
+            builder.Property(u => u.IsDeleted)
+                .HasDefaultValue(false);
+
+            builder.Property(u => u.CreatedAt)
+                .HasDefaultValueSql("NOW()");
+
+            builder.Property(u => u.UpdatedAt);
         }
     }
 }

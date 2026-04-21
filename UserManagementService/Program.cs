@@ -1,49 +1,69 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System.Reflection;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.JwtOption;
-using UserManagementService.Application.ModelValidation;
 using UserManagementService.Application.Services;
 using UserManagementService.Infrastructure;
+using UserManagementService.Infrastructure.Configuration;
 using UserManagementService.Infrastructure.Interfaces;
 using UserManagementService.Infrastructure.Repositories;
+using UserManagementService.Infrastructure.Seeders;
 
 namespace UserManagementService
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
+
+            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
+            builder.Services.AddJwtAuthentication(builder.Configuration);
+            builder.Services.AddAuthorization();
+
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<ITokenService, RSATokenService>();
-
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-            //builder.Services.AddSingleton<IUserRepository, MockUserRepository>();
 
             builder.Services.AddFluentValidationAutoValidation()
                             .AddFluentValidationClientsideAdapters();
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-
-            builder.Services.AddOpenApi();
-
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
-            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            var privateKeyPath = builder.Configuration["JwtSettings:PrivateKeyPath"];
-            //Console.WriteLine($"DEBUG: PrivateKeyPath = {privateKeyPath}");
-
-            if (string.IsNullOrEmpty(privateKeyPath))
-                throw new Exception("Private key path not found in configuration.");
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "User Management API", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
 
             builder.Services.AddCors(options =>
             {
@@ -56,17 +76,24 @@ namespace UserManagementService
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                await db.Database.MigrateAsync();
+                await UserSeeder.SeedAsync(db);
+            }
 
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.MapOpenApi();
             }
 
             app.UseCors("AllowFrontend");
-            // app.UseHttpsRedirection();  
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

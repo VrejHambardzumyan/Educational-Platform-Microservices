@@ -66,5 +66,15 @@ namespace CourseEnrollment.Infrastructure.Repositories
                 .Where(e => e.PaymentId == paymentId)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<bool> HasActiveEnrollmentAsync(int userId, int courseId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Enrollments
+                .AnyAsync(e => e.UserId == userId
+                    && e.CourseId == courseId
+                    && e.Status != nameof(PaymentStatus.Deleted)
+                    && e.Status != nameof(PaymentStatus.Failed),
+                    cancellationToken);
+        }
     }
 }

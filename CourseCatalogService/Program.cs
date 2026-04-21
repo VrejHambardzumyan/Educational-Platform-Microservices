@@ -19,7 +19,7 @@ namespace CourseCatalogService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // CORS — must be registered in services first
+            // CORS ï¿½ must be registered in services first
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
@@ -68,6 +68,8 @@ namespace CourseCatalogService
 
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+            builder.Services.AddScoped<ILessonService, LessonService>();
 
             builder.Services.AddFluentValidationAutoValidation()
                             .AddFluentValidationClientsideAdapters();
@@ -92,7 +94,7 @@ namespace CourseCatalogService
 
             app.UseHttpsRedirection();
 
-            // ORDER MATTERS — CORS must come before Auth
+            // ORDER MATTERS ï¿½ CORS must come before Auth
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();

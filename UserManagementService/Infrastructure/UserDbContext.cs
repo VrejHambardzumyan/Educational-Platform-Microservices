@@ -7,11 +7,14 @@ namespace UserManagementService.Infrastructure
     public class UserDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
-    }     
+    }
 }

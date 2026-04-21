@@ -1,10 +1,10 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Identity.Data;
+using System.Security.Cryptography;
+using System.Text;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
-using UserManagementService.Infrastructure;
 using UserManagementService.Infrastructure.Entities;
 using UserManagementService.Infrastructure.Interfaces;
+
 namespace UserManagementService.Application.Services
 {
     public class AuthService : IAuthService
@@ -31,14 +31,15 @@ namespace UserManagementService.Application.Services
                 UserName = userName,
                 Password = hashedPassword,
                 Email = email
-
             };
+
+            await _userRepository.AddEntityAsync(user);
 
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            await _userRepository.AddEntityAsync(user);
-           
+            await StoreRefreshTokenAsync(user.Id, refreshToken);
+
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
@@ -53,11 +54,10 @@ namespace UserManagementService.Application.Services
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
                 throw new UnauthorizedAccessException("Invalid username or password");
 
-            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-                throw new UnauthorizedAccessException("Invalid username or password");
-
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
+
+            await StoreRefreshTokenAsync(user.Id, refreshToken);
 
             return new AuthResponseDto
             {
@@ -67,5 +67,56 @@ namespace UserManagementService.Application.Services
             };
         }
 
+        public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
+        {
+            var tokenHash = HashToken(refreshToken);
+            var storedToken = await _userRepository.GetRefreshTokenAsync(tokenHash);
+
+            if (storedToken == null || storedToken.ExpiresAt < DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Invalid or expired refresh token");
+
+            var user = storedToken.User;
+
+            var newAccessToken = _tokenService.GenerateAccessToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            var newTokenHash = HashToken(newRefreshToken);
+
+            await _userRepository.RevokeRefreshTokenAsync(storedToken, newTokenHash);
+            await StoreRefreshTokenAsync(user.Id, newRefreshToken);
+
+            return new AuthResponseDto
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                UserId = user.Id
+            };
+        }
+
+        public async Task RevokeTokenAsync(string refreshToken)
+        {
+            var tokenHash = HashToken(refreshToken);
+            var storedToken = await _userRepository.GetRefreshTokenAsync(tokenHash);
+
+            if (storedToken != null)
+                await _userRepository.RevokeRefreshTokenAsync(storedToken);
+        }
+
+        private async Task StoreRefreshTokenAsync(int userId, string refreshToken)
+        {
+            var token = new RefreshToken
+            {
+                UserId = userId,
+                TokenHash = HashToken(refreshToken),
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                CreatedAt = DateTime.UtcNow
+            };
+            await _userRepository.AddRefreshTokenAsync(token);
+        }
+
+        private static string HashToken(string token)
+        {
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(bytes);
+        }
     }
 }

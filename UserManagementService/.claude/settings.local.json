@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ideat/source/repos/Educational-Platform-Microservices/CourseCatalogService/**)",
+      "Read(//c/Users/ideat/source/repos/Educational-Platform-Microservices/CourseEnrollment/**)",
+      "Bash(dotnet restore *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet new *)"
+    ]
+  }
+}

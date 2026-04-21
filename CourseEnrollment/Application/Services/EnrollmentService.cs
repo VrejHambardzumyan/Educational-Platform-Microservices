@@ -2,6 +2,7 @@
 using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Models.DTOs;
+using CourseEnrollment.Application.Validation;
 using CourseEnrollment.Infrastructure;
 using CourseEnrollment.Infrastructure.Entities;
 using CourseEnrollment.Infrastructure.Interfaces;
@@ -10,14 +11,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CourseEnrollment.Application.Services
 {
-    public class EnrollmentService(IPaymentServiceClient paymentClient, ICourseCatalogClient catalogClient, IEnrollmentRepository enrollmentRepo) : IEnrollmentService
+    public class EnrollmentService(
+        IPaymentServiceClient paymentClient,
+        ICourseCatalogClient catalogClient,
+        IEnrollmentRepository enrollmentRepo,
+        IServiceScopeFactory scopeFactory) : IEnrollmentService
     {
         private readonly IPaymentServiceClient _paymentClient = paymentClient;
         private readonly ICourseCatalogClient _catalogClient = catalogClient;
         private readonly IEnrollmentRepository _enrollmentRepo = enrollmentRepo;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
         public async Task<EnrollmentResponseDto> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDtoEntity, CancellationToken cancellationToken = default)
         {
+            var hasActive = await _enrollmentRepo.HasActiveEnrollmentAsync(
+                requestDtoEntity.UserId, requestDtoEntity.CourseId, cancellationToken);
+            if (hasActive)
+                throw new InvalidOperationException("User already has an active enrollment for this course.");
+
             var price = await _catalogClient.GetCoursePriceAsync(requestDtoEntity.CourseId, cancellationToken);
             var enrollment = new EnrollmentEntity
             {
@@ -91,13 +102,22 @@ namespace CourseEnrollment.Application.Services
             await _enrollmentRepo.MarkAsPaidAsync(enrollmentId, cancellationToken);
         }
 
-        public async Task<Guid> InitiatePaymentAsync(int userId, CancellationToken cancellationToken)
+        public async Task<Guid> SubmitCardAsync(int userId, SubmitCardRequestDto cardDto, CancellationToken cancellationToken)
         {
-            var userEnrollments = await _enrollmentRepo.GetAllByUserIdAsync(userId, cancellationToken);
+            if (!CardValidator.IsValidLuhn(cardDto.CardNumber))
+                throw new ArgumentException("Invalid card number.");
 
-            var draftEnrollments = userEnrollments.Where(e => e.Status == "Draft");
-            if (!draftEnrollments.Any())
-                throw new Exception("No draft enrollment to pay for.");
+            if (!CardValidator.IsValidExpiry(cardDto.ExpiryMonth, cardDto.ExpiryYear))
+                throw new ArgumentException("Card has expired.");
+
+            if (!CardValidator.IsValidCvv(cardDto.Cvv))
+                throw new ArgumentException("Invalid CVV.");
+
+            var userEnrollments = await _enrollmentRepo.GetAllByUserIdAsync(userId, cancellationToken);
+            var draftEnrollments = userEnrollments.Where(e => e.Status == "Draft").ToList();
+
+            if (draftEnrollments.Count == 0)
+                throw new InvalidOperationException("No draft enrollments to pay for.");
 
             var paymentId = Guid.NewGuid();
 
@@ -110,11 +130,19 @@ namespace CourseEnrollment.Application.Services
             await _enrollmentRepo.SaveChangesAsync(cancellationToken);
 
             var totalAmount = draftEnrollments.Sum(e => e.Amount);
-
             await _paymentClient.CreatPaymentAsync(userId, paymentId, totalAmount, cancellationToken);
 
-            return paymentId;
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1500);
+                var isSuccess = Random.Shared.NextDouble() > 0.1;
 
+                using var scope = _scopeFactory.CreateScope();
+                var svc = scope.ServiceProvider.GetRequiredService<IEnrollmentService>();
+                await svc.HandlePaymentCallbackAsync(paymentId, isSuccess);
+            });
+
+            return paymentId;
         }
         public async Task HandlePaymentCallbackAsync(Guid paymentId, bool isSuccess, CancellationToken cancellationToken = default)
         {

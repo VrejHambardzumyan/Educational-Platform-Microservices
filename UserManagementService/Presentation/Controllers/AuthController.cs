@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
 
@@ -8,7 +9,6 @@ namespace UserManagementService.Presentation.Controllers
     [Route("auth")]
     public class AuthController : ControllerBase
     {
-
         private readonly IAuthService _authService;
 
         public AuthController(IAuthService authService)
@@ -28,9 +28,9 @@ namespace UserManagementService.Presentation.Controllers
             {
                 return Conflict(new { message = ex.Message });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "Registration failed.", detail = ex.Message });
+                return StatusCode(500, new { message = "Registration failed." });
             }
         }
 
@@ -42,25 +42,40 @@ namespace UserManagementService.Presentation.Controllers
                 var tokenResponse = await _authService.LoginUserAsync(request.UserName, request.Password);
                 return Ok(tokenResponse);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
-                return Unauthorized(new { message = ex.Message });
+                return Unauthorized(new { message = "Invalid username or password" });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "Login failed.", detail = ex.Message });
+                return StatusCode(500, new { message = "Login failed." });
             }
+        }
 
-            //[HttpPost("refresh")]   
-            //public async Task<IActionResult> Refresh(RefreshTokenRequestDTO request)
-            //{
-            //    var tokenResponse = await _authService.RefreshToken(request.RefreshToken);
-            //    if (tokenResponse == null)
-            //        return Unauthorized(new { message = "Invalid refresh token" });
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh(RefreshTokenRequestDto request)
+        {
+            try
+            {
+                var tokenResponse = await _authService.RefreshTokenAsync(request.RefreshToken);
+                return Ok(tokenResponse);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new { message = "Invalid or expired refresh token" });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Token refresh failed." });
+            }
+        }
 
-            //    return Ok(tokenResponse);
-            //}
-
+        [HttpPost("revoke")]
+        [Authorize]
+        public async Task<IActionResult> Revoke(RefreshTokenRequestDto request)
+        {
+            await _authService.RevokeTokenAsync(request.RefreshToken);
+            return NoContent();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using CourseCatalogService.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,10 +13,12 @@ namespace CourseCatalogService.Infrastructure.Configuration
             builder.HasKey(c => c.Id);
 
             builder.Property(c => c.Title)
-                .IsRequired();
-            
+                .IsRequired()
+                .HasMaxLength(200);
+
             builder.Property(c => c.Description)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(2000);
 
             builder.Property(c => c.DurationInMonth)
                 .IsRequired();
@@ -24,8 +26,25 @@ namespace CourseCatalogService.Infrastructure.Configuration
             builder.Property(c => c.Price)
                 .IsRequired();
 
-            builder.HasIndex(c => c.Id)
-                .IsUnique();
+            builder.Property(c => c.InstructorId)
+                .IsRequired();
+
+            builder.Property(c => c.Status)
+                .HasConversion<string>()
+                .HasDefaultValue(CourseStatus.Draft);
+
+            builder.Property(c => c.Category)
+                .HasMaxLength(100);
+
+            builder.Property(c => c.IsDeleted)
+                .HasDefaultValue(false);
+
+            builder.Property(c => c.CreatedAt)
+                .HasDefaultValueSql("NOW()");
+
+            builder.HasIndex(c => c.InstructorId);
+            builder.HasIndex(c => c.Status);
+            builder.HasIndex(c => c.Category);
         }
     }
 }

@@ -6,5 +6,7 @@ namespace UserManagementService.Application.Interfaces
     {
         Task<AuthResponseDto> RegisterUserAsync(string userName, string password, string email);
         Task<AuthResponseDto> LoginUserAsync(string userName, string password);
+        Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
+        Task RevokeTokenAsync(string refreshToken);
     }
 }

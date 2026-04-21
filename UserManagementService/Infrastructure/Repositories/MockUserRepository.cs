@@ -1,21 +1,71 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using UserManagementService.Infrastructure.Entities;
 using UserManagementService.Infrastructure.Interfaces;
+
 namespace UserManagementService.Infrastructure.Repositories
 {
     public class MockUserRepository : IUserRepository
     {
-        private readonly ConcurrentDictionary<string,User> _user =new();
+        private readonly ConcurrentDictionary<string, User> _users = new();
+        private readonly ConcurrentDictionary<string, RefreshToken> _refreshTokens = new();
+        private int _nextId = 1;
 
-        public Task<User?> GetByUserNameAsync (string userName)
+        public Task<User?> GetByUserNameAsync(string userName)
         {
-            _user.TryGetValue(userName, out var user);
+            _users.TryGetValue(userName, out var user);
             return Task.FromResult(user);
         }
 
         public Task AddEntityAsync(User entity)
         {
-            _user[entity.UserName] = entity;
+            entity.Id = Interlocked.Increment(ref _nextId);
+            _users[entity.UserName] = entity;
+            return Task.CompletedTask;
+        }
+
+        public Task<User?> GetByIdAsync(int id)
+        {
+            var user = _users.Values.FirstOrDefault(u => u.Id == id && !u.IsDeleted);
+            return Task.FromResult(user);
+        }
+
+        public Task<(IEnumerable<User> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
+        {
+            var all = _users.Values.Where(u => !u.IsDeleted).ToList();
+            var items = all.Skip((page - 1) * pageSize).Take(pageSize);
+            return Task.FromResult((items.AsEnumerable(), all.Count));
+        }
+
+        public Task UpdateAsync(User entity)
+        {
+            entity.UpdatedAt = DateTime.UtcNow;
+            _users[entity.UserName] = entity;
+            return Task.CompletedTask;
+        }
+
+        public Task SaveChangesAsync() => Task.CompletedTask;
+
+        public Task AddRefreshTokenAsync(RefreshToken token)
+        {
+            _refreshTokens[token.TokenHash] = token;
+            return Task.CompletedTask;
+        }
+
+        public Task<RefreshToken?> GetRefreshTokenAsync(string tokenHash)
+        {
+            _refreshTokens.TryGetValue(tokenHash, out var token);
+            if (token != null && !token.IsRevoked)
+            {
+                token.User = _users.Values.First(u => u.Id == token.UserId);
+                return Task.FromResult<RefreshToken?>(token);
+            }
+            return Task.FromResult<RefreshToken?>(null);
+        }
+
+        public Task RevokeRefreshTokenAsync(RefreshToken token, string? replacedByHash = null)
+        {
+            token.IsRevoked = true;
+            token.ReplacedByTokenHash = replacedByHash;
             return Task.CompletedTask;
         }
     }

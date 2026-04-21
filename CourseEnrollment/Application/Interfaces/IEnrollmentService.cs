@@ -6,15 +6,15 @@ namespace CourseEnrollment.Application.Interfaces
     {
         Task<EnrollmentResponseDto> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDto, CancellationToken cancellationToken = default);
 
-        Task MarkAsPaidAsync(int enrollmentId,CancellationToken cancellationToken = default);
+        Task MarkAsPaidAsync(int enrollmentId, CancellationToken cancellationToken = default);
 
         Task MarkAsDeletedAsync(int enrollmentId, CancellationToken cancellationToken = default);
 
         Task<IEnumerable<EnrollmentResponseDto>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default);
 
         Task<EnrollmentResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-  
-        Task<Guid> InitiatePaymentAsync(int userId, CancellationToken cancellationToken = default);
+
+        Task<Guid> SubmitCardAsync(int userId, SubmitCardRequestDto cardDto, CancellationToken cancellationToken = default);
 
         Task HandlePaymentCallbackAsync(Guid paymentId, bool isSuccess, CancellationToken cancellationToken = default);
     }
