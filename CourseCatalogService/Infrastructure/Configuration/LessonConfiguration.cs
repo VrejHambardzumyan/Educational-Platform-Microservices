@@ -33,6 +33,12 @@ namespace CourseCatalogService.Infrastructure.Configuration
                 .WithMany()
                 .HasForeignKey(l => l.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(l => l.Section)
+                .WithMany(s => s.Lessons)
+                .HasForeignKey(l => l.SectionId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

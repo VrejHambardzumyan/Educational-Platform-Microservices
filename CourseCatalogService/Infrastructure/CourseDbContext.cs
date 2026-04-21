@@ -9,11 +9,15 @@ namespace CourseCatalogService.Infrastructure
 
         public DbSet<Course> Courses { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<ContentBlock> ContentBlocks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new CourseConfiguration());
             modelBuilder.ApplyConfiguration(new LessonConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionConfiguration());
+            modelBuilder.ApplyConfiguration(new ContentBlockConfiguration());
         }
     }
 }   

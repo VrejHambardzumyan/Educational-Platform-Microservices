@@ -10,5 +10,6 @@ namespace CourseCatalogService.Infrastructure.Interfaces
         Task UpdateAsync(Lesson lesson);
         Task<bool> DeleteAsync(int id);
         Task<int> CountByCourseIdAsync(int courseId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Lesson>> GetBySectionIdAsync(int sectionId, CancellationToken cancellationToken = default);
     }
 }

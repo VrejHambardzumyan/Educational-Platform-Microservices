@@ -5,7 +5,9 @@
       "Read(//c/Users/ideat/source/repos/Educational-Platform-Microservices/CourseEnrollment/**)",
       "Bash(dotnet restore *)",
       "Bash(dotnet build *)",
-      "Bash(dotnet new *)"
+      "Bash(dotnet new *)",
+      "Bash(grep -E '\\\\.cs$')",
+      "Bash(dotnet ef *)"
     ]
   }
 }

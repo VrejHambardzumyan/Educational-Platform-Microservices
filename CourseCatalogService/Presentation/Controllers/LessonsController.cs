@@ -83,19 +83,6 @@ namespace CourseCatalogService.Presentation.Controllers
             return NoContent();
         }
 
-        [HttpPost("{lessonId}/upload-url")]
-        [Authorize(Roles = "Instructor")]
-        public async Task<IActionResult> GetUploadUrl(int courseId, int lessonId, CancellationToken cancellationToken)
-        {
-            var instructorId = GetCurrentUserId();
-            if (instructorId == null) return Unauthorized();
-
-            var result = await _lessonService.GetPresignedUploadUrlAsync(courseId, lessonId, instructorId.Value, cancellationToken);
-            if (result == null) return NotFound(new { message = "Lesson not found or you don't own this course." });
-
-            return Ok(new { uploadUrl = result.Value.UploadUrl, videoUrl = result.Value.VideoUrl });
-        }
-
         [HttpPut("{lessonId}/video-url")]
         [Authorize(Roles = "Instructor")]
         public async Task<IActionResult> UpdateVideoUrl(int courseId, int lessonId, [FromBody] VideoUrlUpdateDto dto, CancellationToken cancellationToken)

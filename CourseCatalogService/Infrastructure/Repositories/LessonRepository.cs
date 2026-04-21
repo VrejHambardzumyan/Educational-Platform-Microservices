@@ -50,5 +50,14 @@ namespace CourseCatalogService.Infrastructure.Repositories
         {
             return await _context.Lessons.CountAsync(l => l.CourseId == courseId && !l.IsDeleted, cancellationToken);
         }
+
+        public async Task<IEnumerable<Lesson>> GetBySectionIdAsync(int sectionId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Lessons
+                .Where(l => l.SectionId == sectionId && !l.IsDeleted)
+                .OrderBy(l => l.OrderIndex)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

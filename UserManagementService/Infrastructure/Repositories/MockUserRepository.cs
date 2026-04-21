@@ -43,6 +43,12 @@ namespace UserManagementService.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
+        public Task DeleteAsync(User entity)
+        {
+            entity.IsDeleted = true;
+            return Task.CompletedTask;
+        }
+
         public Task SaveChangesAsync() => Task.CompletedTask;
 
         public Task AddRefreshTokenAsync(RefreshToken token)

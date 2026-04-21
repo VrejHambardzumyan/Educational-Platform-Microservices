@@ -13,6 +13,10 @@ namespace CourseCatalogService.Infrastructure.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
+        public int? SectionId { get; set; }
+
         public Course Course { get; set; } = null!;
+        public Section? Section { get; set; }
+        public ICollection<ContentBlock> ContentBlocks { get; set; } = [];
     }
 }
