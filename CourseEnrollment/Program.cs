@@ -1,3 +1,4 @@
+using CourseEnrollment.Application.ExternalCalls;
 using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
 using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
@@ -26,7 +27,13 @@ namespace CourseEnrollment
                 client.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-            builder.Services.AddScoped<IPaymentServiceClient, MockPaymentServiceClient>();
+            builder.Services.Configure<PaymentServiceSettings>(
+                    builder.Configuration.GetSection("ExternalServices:Payment"));
+            builder.Services.AddHttpClient<IPaymentServiceClient, PaymentServiceClient>((sp, client) =>
+            {
+                var settings = sp.GetRequiredService<IOptions<PaymentServiceSettings>>().Value;
+                client.BaseAddress = new Uri(settings.BaseUrl);
+            });
 
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);

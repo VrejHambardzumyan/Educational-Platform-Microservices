@@ -1,3 +1,4 @@
+using Amazon.S3;
 using CourseCatalogService.Application.Interfaces;
 using CourseCatalogService.Application.Services;
 using CourseCatalogService.Infrastructure;
@@ -65,6 +66,18 @@ namespace CourseCatalogService
                     }
                 });
             });
+
+            builder.Services.Configure<S3Settings>(builder.Configuration.GetSection("S3"));
+            builder.Services.AddSingleton<IAmazonS3>(sp =>
+            {
+                var s3Settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<S3Settings>>().Value;
+                var config = new Amazon.S3.AmazonS3Config
+                {
+                    RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(s3Settings.Region)
+                };
+                return new Amazon.S3.AmazonS3Client(config);
+            });
+            builder.Services.AddSingleton<IS3Service, S3Service>();
 
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ICourseService, CourseService>();

@@ -8,6 +8,7 @@ namespace UserManagementService.Infrastructure
     {
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<OtpRecord> OtpRecords { get; set; }
 
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
 
@@ -15,6 +16,7 @@ namespace UserManagementService.Infrastructure
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new OtpRecordConfiguration());
         }
     }
 }

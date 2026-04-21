@@ -4,7 +4,9 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet restore:*)",
       "Bash(dotnet new:*)",
-      "Bash(grep -E \"\\(Program\\\\.cs|\\\\.csproj\\)$\")"
+      "Bash(grep -E \"\\(Program\\\\.cs|\\\\.csproj\\)$\")",
+      "Bash(dotnet add *)",
+      "Bash(dotnet ef *)"
     ]
   }
 }

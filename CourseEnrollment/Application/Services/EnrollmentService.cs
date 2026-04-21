@@ -3,24 +3,20 @@ using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Models.DTOs;
 using CourseEnrollment.Application.Validation;
-using CourseEnrollment.Infrastructure;
 using CourseEnrollment.Infrastructure.Entities;
 using CourseEnrollment.Infrastructure.Interfaces;
 using CourseEnrollment.Infrastructure.Status;
-using Microsoft.EntityFrameworkCore;
 
 namespace CourseEnrollment.Application.Services
 {
     public class EnrollmentService(
         IPaymentServiceClient paymentClient,
         ICourseCatalogClient catalogClient,
-        IEnrollmentRepository enrollmentRepo,
-        IServiceScopeFactory scopeFactory) : IEnrollmentService
+        IEnrollmentRepository enrollmentRepo) : IEnrollmentService
     {
         private readonly IPaymentServiceClient _paymentClient = paymentClient;
         private readonly ICourseCatalogClient _catalogClient = catalogClient;
         private readonly IEnrollmentRepository _enrollmentRepo = enrollmentRepo;
-        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
         public async Task<EnrollmentResponseDto> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDtoEntity, CancellationToken cancellationToken = default)
         {
@@ -130,17 +126,9 @@ namespace CourseEnrollment.Application.Services
             await _enrollmentRepo.SaveChangesAsync(cancellationToken);
 
             var totalAmount = draftEnrollments.Sum(e => e.Amount);
+            // PaymentService receives the charge, runs the Stripe simulation,
+            // and fires POST /CourseEnrollment/PaymentCallback when done
             await _paymentClient.CreatPaymentAsync(userId, paymentId, totalAmount, cancellationToken);
-
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(1500);
-                var isSuccess = Random.Shared.NextDouble() > 0.1;
-
-                using var scope = _scopeFactory.CreateScope();
-                var svc = scope.ServiceProvider.GetRequiredService<IEnrollmentService>();
-                await svc.HandlePaymentCallbackAsync(paymentId, isSuccess);
-            });
 
             return paymentId;
         }

@@ -3,6 +3,7 @@ using CourseCatalogService.Application.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace CourseCatalogService.Presentation.Controllers
 {
     [ApiController]
@@ -80,6 +81,31 @@ namespace CourseCatalogService.Presentation.Controllers
             var result = await _lessonService.DeleteLessonAsync(id, userId.Value, User.IsInRole("Admin"));
             if (!result) return NotFound(new { message = "Lesson not found or not authorized." });
             return NoContent();
+        }
+
+        [HttpPost("{lessonId}/upload-url")]
+        [Authorize(Roles = "Instructor")]
+        public async Task<IActionResult> GetUploadUrl(int courseId, int lessonId, CancellationToken cancellationToken)
+        {
+            var instructorId = GetCurrentUserId();
+            if (instructorId == null) return Unauthorized();
+
+            var result = await _lessonService.GetPresignedUploadUrlAsync(courseId, lessonId, instructorId.Value, cancellationToken);
+            if (result == null) return NotFound(new { message = "Lesson not found or you don't own this course." });
+
+            return Ok(new { uploadUrl = result.Value.UploadUrl, videoUrl = result.Value.VideoUrl });
+        }
+
+        [HttpPut("{lessonId}/video-url")]
+        [Authorize(Roles = "Instructor")]
+        public async Task<IActionResult> UpdateVideoUrl(int courseId, int lessonId, [FromBody] VideoUrlUpdateDto dto, CancellationToken cancellationToken)
+        {
+            var instructorId = GetCurrentUserId();
+            if (instructorId == null) return Unauthorized();
+
+            var updated = await _lessonService.UpdateVideoUrlAsync(courseId, lessonId, dto.VideoUrl, instructorId.Value, cancellationToken);
+            if (updated == null) return NotFound(new { message = "Lesson not found or you don't own this course." });
+            return Ok(updated);
         }
 
         private int? GetCurrentUserId()

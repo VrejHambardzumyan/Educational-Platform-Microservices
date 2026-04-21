@@ -48,6 +48,12 @@ namespace UserManagementService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task DeleteAsync(User entity)
+        {
+            _context.Users.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddRefreshTokenAsync(RefreshToken token)
         {
             _context.RefreshTokens.Add(token);
@@ -66,6 +72,27 @@ namespace UserManagementService.Infrastructure.Repositories
             token.IsRevoked = true;
             token.ReplacedByTokenHash = replacedByHash;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) =>
+            await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+
+        public async Task AddOtpAsync(OtpRecord otp, CancellationToken cancellationToken = default)
+        {
+            _context.OtpRecords.Add(otp);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<OtpRecord?> GetValidOtpAsync(int userId, string purpose, CancellationToken cancellationToken = default) =>
+            await _context.OtpRecords
+                .Where(o => o.UserId == userId && o.Purpose == purpose && !o.IsUsed && o.ExpiresAt > DateTime.UtcNow)
+                .OrderByDescending(o => o.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+        public async Task MarkOtpUsedAsync(OtpRecord otp, CancellationToken cancellationToken = default)
+        {
+            otp.IsUsed = true;
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

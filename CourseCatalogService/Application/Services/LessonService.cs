@@ -5,10 +5,11 @@ using CourseCatalogService.Infrastructure.Interfaces;
 
 namespace CourseCatalogService.Application.Services
 {
-    public class LessonService(ILessonRepository lessonRepo, ICourseRepository courseRepo) : ILessonService
+    public class LessonService(ILessonRepository lessonRepo, ICourseRepository courseRepo, IS3Service s3Service) : ILessonService
     {
         private readonly ILessonRepository _lessonRepo = lessonRepo;
         private readonly ICourseRepository _courseRepo = courseRepo;
+        private readonly IS3Service _s3Service = s3Service;
 
         public async Task<LessonResponseDto> AddLessonAsync(int courseId, LessonRequestDto dto, int instructorId)
         {
@@ -72,6 +73,32 @@ namespace CourseCatalogService.Application.Services
             }
 
             return await _lessonRepo.DeleteAsync(id);
+        }
+
+        public async Task<(string UploadUrl, string VideoUrl)?> GetPresignedUploadUrlAsync(int courseId, int lessonId, int instructorId, CancellationToken cancellationToken = default)
+        {
+            var lesson = await _lessonRepo.GetByIdAsync(lessonId, cancellationToken);
+            if (lesson == null || lesson.CourseId != courseId) return null;
+
+            var course = await _courseRepo.GetCourseByIdAsync(courseId, cancellationToken);
+            if (course == null || course.InstructorId != instructorId) return null;
+
+            var uploadUrl = _s3Service.GeneratePresignedUploadUrl(courseId, lessonId);
+            var videoUrl = _s3Service.BuildPublicVideoUrl(courseId, lessonId);
+            return (uploadUrl, videoUrl);
+        }
+
+        public async Task<LessonResponseDto?> UpdateVideoUrlAsync(int courseId, int lessonId, string videoUrl, int instructorId, CancellationToken cancellationToken = default)
+        {
+            var lesson = await _lessonRepo.GetByIdAsync(lessonId, cancellationToken);
+            if (lesson == null || lesson.CourseId != courseId) return null;
+
+            var course = await _courseRepo.GetCourseByIdAsync(courseId, cancellationToken);
+            if (course == null || course.InstructorId != instructorId) return null;
+
+            lesson.VideoUrl = videoUrl;
+            await _lessonRepo.UpdateAsync(lesson);
+            return MapToDto(lesson);
         }
 
         private static LessonResponseDto MapToDto(Lesson l) => new()

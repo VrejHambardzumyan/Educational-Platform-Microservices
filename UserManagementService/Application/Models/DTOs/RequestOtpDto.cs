@@ -1,0 +1,8 @@
+namespace UserManagementService.Application.Models.DTOs
+{
+    public class RequestOtpDto
+    {
+        public required string Email { get; set; }
+        public required string Purpose { get; set; }
+    }
+}

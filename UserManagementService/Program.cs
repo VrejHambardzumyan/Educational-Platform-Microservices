@@ -27,10 +27,15 @@ namespace UserManagementService
             builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddAuthorization();
 
+            builder.Services.Configure<TwoFactorSettings>(builder.Configuration.GetSection("TwoFactor"));
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<ITokenService, RSATokenService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IOtpService, OtpService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             builder.Services.AddFluentValidationAutoValidation()
                             .AddFluentValidationClientsideAdapters();

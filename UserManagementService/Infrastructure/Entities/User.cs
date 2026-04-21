@@ -8,6 +8,7 @@
         public required string Password { get; set; }
         public string Role { get; set; } = "Student";
         public bool IsDeleted { get; set; }
+        public bool IsEmailVerified { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
