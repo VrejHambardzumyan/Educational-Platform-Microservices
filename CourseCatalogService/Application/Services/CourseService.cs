@@ -99,6 +99,7 @@ namespace CourseCatalogService.Application.Services
             Status = c.Status.ToString(),
             Category = c.Category,
             ThumbnailUrl = c.ThumbnailUrl,
+            AverageRating = c.AverageRating,
             CreatedAt = c.CreatedAt
         };
     }
