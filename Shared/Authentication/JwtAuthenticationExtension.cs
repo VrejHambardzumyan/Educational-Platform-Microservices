@@ -28,7 +28,7 @@ namespace Shared.Authentication
                     ValidateIssuer = true,
                     ValidIssuer = configuration["JwtSettings:Issuer"] ?? "AuthService",
                     ValidateAudience = true,
-                    ValidAudience = configuration["JwtSettings:Audience"] ?? "CourseCatalogService",
+                    ValidAudience = configuration["JwtSettings:Audience"] ?? "LMSPlatform",
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new RsaSecurityKey(rsa),

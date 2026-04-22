@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using ProgressTrackingService.Application.HttpClients;
 using ProgressTrackingService.Application.Interfaces;
 using ProgressTrackingService.Application.Services;
 using ProgressTrackingService.Infrastructure;
+using ProgressTrackingService.Infrastructure.Http;
 using ProgressTrackingService.Infrastructure.Interfaces;
 using ProgressTrackingService.Infrastructure.Repositories;
 using Shared.Authentication;
@@ -24,6 +26,21 @@ namespace ProgressTrackingService
 
             builder.Services.AddAuthorization();
 
+            // Token forwarding: copies the caller's Bearer token onto outbound HTTP requests
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddTransient<ForwardAuthHandler>();
+
+            // Typed HTTP clients for cross-service calls
+            builder.Services.AddHttpClient<IEnrollmentClient, EnrollmentClient>(c =>
+                c.BaseAddress = new Uri(
+                    builder.Configuration["ServiceUrls:Enrollment"] ?? "http://localhost:5220/"))
+                .AddHttpMessageHandler<ForwardAuthHandler>();
+
+            builder.Services.AddHttpClient<ICatalogClient, CatalogClient>(c =>
+                c.BaseAddress = new Uri(
+                    builder.Configuration["ServiceUrls:CourseCatalog"] ?? "http://localhost:5034/"))
+                .AddHttpMessageHandler<ForwardAuthHandler>();
+
             builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
             builder.Services.AddScoped<IProgressService, ProgressService>();
 
@@ -35,10 +52,10 @@ namespace ProgressTrackingService
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme.",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
+                    Name        = "Authorization",
+                    In          = ParameterLocation.Header,
+                    Type        = SecuritySchemeType.Http,
+                    Scheme      = "bearer",
                     BearerFormat = "JWT"
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -49,7 +66,7 @@ namespace ProgressTrackingService
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
+                                Id   = "Bearer"
                             }
                         },
                         Array.Empty<string>()
@@ -58,15 +75,13 @@ namespace ProgressTrackingService
             });
 
             builder.Services.AddCors(options =>
-            {
                 options.AddPolicy("AllowFrontend", policy =>
                     policy.WithOrigins(
                             "http://localhost:5173",
                             "http://localhost:5174",
                             "http://localhost:5175")
                           .AllowAnyHeader()
-                          .AllowAnyMethod());
-            });
+                          .AllowAnyMethod()));
 
             var app = builder.Build();
 

@@ -83,6 +83,22 @@ namespace CourseEnrollment.Presentation.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns whether the current user has an active (paid) enrollment for the given course.
+        /// Called by ProgressTrackingService before recording lesson progress.
+        /// </summary>
+        [HttpGet("is-enrolled/{courseId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> IsEnrolled(int courseId, CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            var enrollments = await _enrollment.GetAllByUserIdAsync(userId.Value, cancellationToken);
+            var isEnrolled = enrollments.Any(e => e.CourseId == courseId && e.ActivatedAt.HasValue);
+            return Ok(new { isEnrolled });
+        }
+
         [HttpGet("my-enrollments")]
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> GetMyEnrollments(CancellationToken cancellationToken)

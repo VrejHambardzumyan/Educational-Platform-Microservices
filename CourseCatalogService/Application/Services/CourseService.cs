@@ -2,6 +2,7 @@ using CourseCatalogService.Application.Interfaces;
 using CourseCatalogService.Application.Models.DTOs;
 using CourseCatalogService.Infrastructure.Entities;
 using CourseCatalogService.Infrastructure.Interfaces;
+using Shared.Models;
 
 namespace CourseCatalogService.Application.Services
 {
@@ -25,11 +26,11 @@ namespace CourseCatalogService.Application.Services
             return MapToDto(created);
         }
 
-        public async Task<PagedResponseDto<CourseResponseDto>> GetCoursesAsync(
+        public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
             int page, int pageSize, string? category = null, string? search = null)
         {
             var (courses, totalCount) = await _courseRepo.GetCoursesAsync(page, pageSize, category, search);
-            return new PagedResponseDto<CourseResponseDto>
+            return new PagedResponse<CourseResponseDto>
             {
                 Items = courses.Select(MapToDto),
                 Page = page,

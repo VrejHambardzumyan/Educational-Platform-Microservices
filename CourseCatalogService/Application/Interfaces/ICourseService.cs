@@ -1,11 +1,12 @@
 using CourseCatalogService.Application.Models.DTOs;
+using Shared.Models;
 
 namespace CourseCatalogService.Application.Interfaces
 {
     public interface ICourseService
     {
         Task<CourseResponseDto> AddCourseAsync(CourseRequestDto courseRequestDto, int instructorId);
-        Task<PagedResponseDto<CourseResponseDto>> GetCoursesAsync(int page, int pageSize, string? category = null, string? search = null);
+        Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(int page, int pageSize, string? category = null, string? search = null);
         Task<CourseResponseDto?> GetCourseByIdAsync(int id, CancellationToken cancellationToken);
         Task<IEnumerable<CourseResponseDto>> GetByInstructorIdAsync(int instructorId, CancellationToken cancellationToken);
         Task<CourseResponseDto?> UpdateCourseAsync(int id, CourseUpdateRequestDto dto, int instructorId);

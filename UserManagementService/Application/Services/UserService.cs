@@ -1,3 +1,4 @@
+using Shared.Models;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
 using UserManagementService.Infrastructure.Interfaces;
@@ -49,11 +50,11 @@ namespace UserManagementService.Application.Services
         }
 
         /// <summary>Returns a paginated list of all non-deleted users.</summary>
-        public async Task<PagedResponseDto<UserProfileResponseDto>> GetAllAsync(int page, int pageSize)
+        public async Task<PagedResponse<UserProfileResponseDto>> GetAllAsync(int page, int pageSize)
         {
             var (users, totalCount) = await _userRepo.GetAllAsync(page, pageSize);
 
-            return new PagedResponseDto<UserProfileResponseDto>
+            return new PagedResponse<UserProfileResponseDto>
             {
                 Items = users.Select(u => new UserProfileResponseDto
                 {

@@ -24,7 +24,7 @@ namespace CourseCatalogService.Infrastructure.Configuration
                     ValidateIssuer = true,
                     ValidIssuer = "AuthService",
                     ValidateAudience = true,
-                    ValidAudience = "CourseCatalogService",
+                    ValidAudience = "LMSPlatform",
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new RsaSecurityKey(rsa),
