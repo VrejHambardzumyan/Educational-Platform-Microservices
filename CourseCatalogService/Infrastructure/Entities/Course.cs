@@ -12,6 +12,8 @@ namespace CourseCatalogService.Infrastructure.Entities
         public string? Category { get; set; }
         public string? ThumbnailUrl { get; set; }
         public bool IsDeleted { get; set; }
+        public double AverageRating { get; set; } = 0;
+        public int RatingCount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
     }

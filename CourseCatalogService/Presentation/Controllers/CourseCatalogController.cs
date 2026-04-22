@@ -38,7 +38,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet("GetAllCourses")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin,Instructor,Student")]
         public async Task<IActionResult> GetCourses(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20,
@@ -53,7 +53,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet("GetCourseById/{id}")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin,Instructor,Student")]
         public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
         {
             var course = await _courseService.GetCourseByIdAsync(id, cancellationToken);
@@ -81,7 +81,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Instructor")]
+        [Authorize(Roles = "Admin,Instructor")]
         public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseUpdateRequestDto dto)
         {
             var instructorId = GetCurrentUserId();
@@ -106,7 +106,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPatch("{id}/publish")]
-        [Authorize(Roles = "Instructor")]
+        [Authorize(Roles = "Admin,Instructor")]
         public async Task<IActionResult> PublishCourse(int id)
         {
             var instructorId = GetCurrentUserId();

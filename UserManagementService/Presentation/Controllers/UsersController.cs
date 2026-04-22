@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using UserManagementService.Application.Authorization;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.DTOs;
 
@@ -18,6 +19,7 @@ namespace UserManagementService.Presentation.Controllers
             _userService = userService;
         }
 
+        /// <summary>Returns the authenticated user's own profile.</summary>
         [HttpGet("me")]
         public async Task<IActionResult> GetMyProfile()
         {
@@ -29,6 +31,7 @@ namespace UserManagementService.Presentation.Controllers
             return Ok(profile);
         }
 
+        /// <summary>Updates the authenticated user's own profile.</summary>
         [HttpPut("me")]
         public async Task<IActionResult> UpdateMyProfile(UpdateProfileRequestDto dto)
         {
@@ -40,8 +43,9 @@ namespace UserManagementService.Presentation.Controllers
             return Ok(updated);
         }
 
+        /// <summary>Returns any user's profile. Requires the <c>users.read_any</c> permission.</summary>
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.UsersReadAny)]
         public async Task<IActionResult> GetUserById(int id)
         {
             var profile = await _userService.GetByIdAsync(id);
@@ -49,8 +53,9 @@ namespace UserManagementService.Presentation.Controllers
             return Ok(profile);
         }
 
+        /// <summary>Returns a paginated list of all users. Requires the <c>users.manage</c> permission.</summary>
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.UsersManage)]
         public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             if (page < 1) page = 1;
@@ -60,8 +65,9 @@ namespace UserManagementService.Presentation.Controllers
             return Ok(result);
         }
 
+        /// <summary>Assigns a new role to the specified user. Requires the <c>users.manage</c> permission.</summary>
         [HttpPut("{id}/role")]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.UsersManage)]
         public async Task<IActionResult> UpdateUserRole(int id, UpdateRoleRequestDto dto)
         {
             try
@@ -76,8 +82,9 @@ namespace UserManagementService.Presentation.Controllers
             }
         }
 
+        /// <summary>Soft-deletes the specified user. Requires the <c>users.manage</c> permission.</summary>
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.UsersManage)]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var result = await _userService.SoftDeleteAsync(id);

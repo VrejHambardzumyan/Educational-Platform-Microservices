@@ -39,6 +39,12 @@ namespace CourseCatalogService.Infrastructure.Configuration
             builder.Property(c => c.IsDeleted)
                 .HasDefaultValue(false);
 
+            builder.Property(c => c.AverageRating)
+                .HasDefaultValue(0.0);
+
+            builder.Property(c => c.RatingCount)
+                .HasDefaultValue(0);
+
             builder.Property(c => c.CreatedAt)
                 .HasDefaultValueSql("NOW()");
 

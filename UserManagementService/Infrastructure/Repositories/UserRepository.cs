@@ -14,19 +14,21 @@ namespace UserManagementService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<User?> GetByUserNameAsync(string userName)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName && !u.IsDeleted);
-        }
+        public async Task<User?> GetByUserNameAsync(string userName) =>
+            await WithRoleAndPermissions()
+                .FirstOrDefaultAsync(u => u.UserName == userName && !u.IsDeleted);
 
-        public async Task<User?> GetByIdAsync(int id)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
-        }
+        public async Task<User?> GetByIdAsync(int id) =>
+            await _context.Users
+                .Include(u => u.UserRole)
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
 
         public async Task<(IEnumerable<User> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
         {
-            var query = _context.Users.Where(u => !u.IsDeleted).AsNoTracking();
+            var query = _context.Users
+                .Include(u => u.UserRole)
+                .Where(u => !u.IsDeleted)
+                .AsNoTracking();
             var totalCount = await query.CountAsync();
             var items = await query
                 .OrderBy(u => u.Id)
@@ -60,12 +62,13 @@ namespace UserManagementService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<RefreshToken?> GetRefreshTokenAsync(string tokenHash)
-        {
-            return await _context.RefreshTokens
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string tokenHash) =>
+            await _context.RefreshTokens
                 .Include(r => r.User)
+                    .ThenInclude(u => u.UserRole)
+                        .ThenInclude(r => r.RolePermissions)
+                            .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(r => r.TokenHash == tokenHash && !r.IsRevoked);
-        }
 
         public async Task RevokeRefreshTokenAsync(RefreshToken token, string? replacedByHash = null)
         {
@@ -75,7 +78,8 @@ namespace UserManagementService.Infrastructure.Repositories
         }
 
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) =>
-            await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+            await WithRoleAndPermissions()
+                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
 
         public async Task AddOtpAsync(OtpRecord otp, CancellationToken cancellationToken = default)
         {
@@ -94,5 +98,12 @@ namespace UserManagementService.Infrastructure.Repositories
             otp.IsUsed = true;
             await _context.SaveChangesAsync(cancellationToken);
         }
+
+        // Eagerly loads role + full permission chain — required for JWT generation.
+        private IQueryable<User> WithRoleAndPermissions() =>
+            _context.Users
+                .Include(u => u.UserRole)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UserManagementService.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using UserManagementService.Infrastructure.Entities;
+using static UserManagementService.Infrastructure.Entities.RoleIds;
 
 namespace UserManagementService.Infrastructure.Configuration
 {
@@ -27,10 +28,13 @@ namespace UserManagementService.Infrastructure.Configuration
             builder.HasIndex(u => u.UserName)
                  .IsUnique();
 
-            builder.Property(u => u.Role)
-                .HasColumnName("Role")
-                .HasDefaultValue("Student")
-                .IsRequired();
+            builder.Property(u => u.RoleId)
+                .HasDefaultValue(Student);
+
+            builder.HasOne(u => u.UserRole)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(u => u.IsDeleted)
                 .HasDefaultValue(false);

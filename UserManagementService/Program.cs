@@ -1,8 +1,10 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using UserManagementService.Application.Authorization;
 using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.JwtOption;
 using UserManagementService.Application.Services;
@@ -25,6 +27,10 @@ namespace UserManagementService
 
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
             builder.Services.AddJwtAuthentication(builder.Configuration);
+
+            // Permission-based authorization: dynamic policy provider + handler
+            builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
             builder.Services.AddAuthorization();
 
             builder.Services.Configure<TwoFactorSettings>(builder.Configuration.GetSection("TwoFactor"));
@@ -34,6 +40,7 @@ namespace UserManagementService
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<ITokenService, RSATokenService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IOtpService, OtpService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 

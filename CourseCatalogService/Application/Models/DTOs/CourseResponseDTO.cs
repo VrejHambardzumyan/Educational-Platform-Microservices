@@ -11,6 +11,8 @@ namespace CourseCatalogService.Application.Models.DTOs
         public string? Status { get; init; }
         public string? Category { get; init; }
         public string? ThumbnailUrl { get; init; }
+        public double AverageRating { get; init; }
+        public int RatingCount { get; init; }
         public DateTime CreatedAt { get; init; }
     }
 }

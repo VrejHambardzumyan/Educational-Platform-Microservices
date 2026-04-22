@@ -17,6 +17,7 @@ namespace CourseEnrollment.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("course_enrollment")
                 .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -59,7 +60,7 @@ namespace CourseEnrollment.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enrollment", (string)null);
+                    b.ToTable("Enrollment", "course_enrollment");
                 });
 #pragma warning restore 612, 618
         }

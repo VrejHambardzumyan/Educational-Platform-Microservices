@@ -35,22 +35,35 @@ namespace UserManagementService.Application.Services
             //_rsaPublic.ImportFromPem(File.ReadAllText(_options.PublicKeyPath));
             //_publicKey = new RsaSecurityKey(_rsaPublic);
         }
+        /// <summary>
+        /// Generates a signed JWT containing the user's role (for backward-compatible role checks)
+        /// and individual permission names (for fine-grained <c>HasPermission</c> checks).
+        /// </summary>
         public string GenerateAccessToken(User user)
         {
-            var claims = new[]
+            var roleName = user.UserRole?.Name ?? "Student";
+
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("userId", user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role ?? "Student")
+                // ClaimTypes.Role keeps [Authorize(Roles="...")] working in every service
+                new Claim(ClaimTypes.Role, roleName)
             };
+
+            var permissions = user.UserRole?.RolePermissions
+                .Select(rp => rp.Permission.Name)
+                ?? [];
+
+            claims.AddRange(permissions.Select(p => new Claim("permissions", p)));
 
             var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256);
 
             var token = new JwtSecurityToken(
                 issuer: _options.Issuer,
                 audience: _options.Audience,
-                claims: claims,
+                claims: claims,  // List<Claim> is accepted by the constructor
                 expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
             );
@@ -61,7 +74,7 @@ namespace UserManagementService.Application.Services
         public string GenerateRefreshToken()
         {
             var randomBytes = new byte[64];
-            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
             return Convert.ToBase64String(randomBytes);
         }

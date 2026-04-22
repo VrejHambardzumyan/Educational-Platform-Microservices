@@ -63,6 +63,7 @@ namespace UserManagementService.Infrastructure.Repositories
             if (token != null && !token.IsRevoked)
             {
                 token.User = _users.Values.First(u => u.Id == token.UserId);
+                EnsureUserRoleLoaded(token.User);
                 return Task.FromResult<RefreshToken?>(token);
             }
             return Task.FromResult<RefreshToken?>(null);
@@ -78,6 +79,7 @@ namespace UserManagementService.Infrastructure.Repositories
         public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             var user = _users.Values.FirstOrDefault(u => u.Email == email && !u.IsDeleted);
+            if (user != null) EnsureUserRoleLoaded(user);
             return Task.FromResult(user);
         }
 
@@ -104,6 +106,13 @@ namespace UserManagementService.Infrastructure.Repositories
         {
             otp.IsUsed = true;
             return Task.CompletedTask;
+        }
+
+        // Populates UserRole so token generation never hits a NullReferenceException.
+        private static void EnsureUserRoleLoaded(User user)
+        {
+            if (user.UserRole != null) return;
+            user.UserRole = new Role { Id = user.RoleId, Name = "Student", RolePermissions = [] };
         }
     }
 }

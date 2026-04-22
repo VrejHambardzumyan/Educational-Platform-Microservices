@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CourseCatalogService.Presentation.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin,Instructor")]
     [Route("courses/{courseId}/lessons")]
     public class LessonsController : ControllerBase
     {
@@ -37,7 +38,6 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Instructor")]
         public async Task<IActionResult> AddLesson(int courseId, [FromBody] LessonRequestDto dto)
         {
             var instructorId = GetCurrentUserId();
@@ -60,7 +60,6 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Instructor")]
         public async Task<IActionResult> UpdateLesson(int courseId, int id, [FromBody] LessonRequestDto dto)
         {
             var instructorId = GetCurrentUserId();
@@ -72,7 +71,6 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,Instructor")]
         public async Task<IActionResult> DeleteLesson(int courseId, int id)
         {
             var userId = GetCurrentUserId();
@@ -84,7 +82,6 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpPut("{lessonId}/video-url")]
-        [Authorize(Roles = "Instructor")]
         public async Task<IActionResult> UpdateVideoUrl(int courseId, int lessonId, [FromBody] VideoUrlUpdateDto dto, CancellationToken cancellationToken)
         {
             var instructorId = GetCurrentUserId();

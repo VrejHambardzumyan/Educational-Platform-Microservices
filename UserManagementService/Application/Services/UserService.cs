@@ -4,12 +4,14 @@ using UserManagementService.Infrastructure.Interfaces;
 
 namespace UserManagementService.Application.Services
 {
-    public class UserService(IUserRepository userRepo) : IUserService
+    public class UserService(IUserRepository userRepo, IRoleRepository roleRepo) : IUserService
     {
         private readonly IUserRepository _userRepo = userRepo;
+        private readonly IRoleRepository _roleRepo = roleRepo;
 
         private static readonly HashSet<string> ValidRoles = ["Student", "Instructor", "Admin"];
 
+        /// <summary>Returns a user's public profile, or null when the user does not exist.</summary>
         public async Task<UserProfileResponseDto?> GetByIdAsync(int id)
         {
             var user = await _userRepo.GetByIdAsync(id);
@@ -20,11 +22,12 @@ namespace UserManagementService.Application.Services
                 Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                Role = user.Role,
+                Role = user.UserRole?.Name ?? "Student",
                 CreatedAt = user.CreatedAt
             };
         }
 
+        /// <summary>Updates mutable profile fields for the given user. Returns null when the user does not exist.</summary>
         public async Task<UserProfileResponseDto?> UpdateProfileAsync(int userId, UpdateProfileRequestDto dto)
         {
             var user = await _userRepo.GetByIdAsync(userId);
@@ -40,11 +43,12 @@ namespace UserManagementService.Application.Services
                 Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                Role = user.Role,
+                Role = user.UserRole?.Name ?? "Student",
                 CreatedAt = user.CreatedAt
             };
         }
 
+        /// <summary>Returns a paginated list of all non-deleted users.</summary>
         public async Task<PagedResponseDto<UserProfileResponseDto>> GetAllAsync(int page, int pageSize)
         {
             var (users, totalCount) = await _userRepo.GetAllAsync(page, pageSize);
@@ -56,7 +60,7 @@ namespace UserManagementService.Application.Services
                     Id = u.Id,
                     UserName = u.UserName,
                     Email = u.Email,
-                    Role = u.Role,
+                    Role = u.UserRole?.Name ?? "Student",
                     CreatedAt = u.CreatedAt
                 }),
                 Page = page,
@@ -65,19 +69,27 @@ namespace UserManagementService.Application.Services
             };
         }
 
+        /// <summary>
+        /// Changes the role of the specified user. Throws <see cref="ArgumentException"/> for
+        /// unknown role names. Returns false when the user does not exist.
+        /// </summary>
         public async Task<bool> UpdateRoleAsync(int userId, string role)
         {
             if (!ValidRoles.Contains(role))
                 throw new ArgumentException($"Invalid role. Valid roles: {string.Join(", ", ValidRoles)}");
 
+            var roleEntity = await _roleRepo.GetByNameAsync(role)
+                ?? throw new ArgumentException($"Role '{role}' not found in the database.");
+
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null) return false;
 
-            user.Role = role;
+            user.RoleId = roleEntity.Id;
             await _userRepo.UpdateAsync(user);
             return true;
         }
 
+        /// <summary>Soft-deletes the specified user. Returns false when the user does not exist.</summary>
         public async Task<bool> SoftDeleteAsync(int userId)
         {
             var user = await _userRepo.GetByIdAsync(userId);

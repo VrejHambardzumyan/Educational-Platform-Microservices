@@ -17,6 +17,7 @@ namespace UserManagementService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("user_management")
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -60,7 +61,94 @@ namespace UserManagementService.Migrations
 
                     b.HasIndex("UserId", "Purpose");
 
-                    b.ToTable("otp_records", (string)null);
+                    b.ToTable("otp_records", "user_management");
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("permissions", "user_management");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Read own profile",
+                            Name = "users.read"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Read any user's profile",
+                            Name = "users.read_any"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Update own profile",
+                            Name = "users.update_own"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "List, delete, and reassign roles for any user",
+                            Name = "users.manage"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Browse the course catalog",
+                            Name = "courses.read"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Create new courses",
+                            Name = "courses.create"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Edit or delete any course",
+                            Name = "courses.manage"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Upload lesson and section content",
+                            Name = "content.upload"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "View own enrollments",
+                            Name = "enrollments.read"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Manage all enrollments",
+                            Name = "enrollments.manage"
+                        });
                 });
 
             modelBuilder.Entity("UserManagementService.Infrastructure.Entities.RefreshToken", b =>
@@ -98,7 +186,169 @@ namespace UserManagementService.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("refresh_tokens", (string)null);
+                    b.ToTable("refresh_tokens", "user_management");
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("roles", "user_management");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Enrolled learner",
+                            Name = "Student"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Course creator",
+                            Name = "Instructor"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Platform administrator",
+                            Name = "Admin"
+                        });
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.RolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("role_permissions", "user_management");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 6
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 8
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 4
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 6
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 7
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 8
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 10
+                        });
                 });
 
             modelBuilder.Entity("UserManagementService.Infrastructure.Entities.User", b =>
@@ -131,12 +381,10 @@ namespace UserManagementService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
+                    b.Property<int>("RoleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Student")
-                        .HasColumnName("Role");
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -149,10 +397,12 @@ namespace UserManagementService.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RoleId");
+
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users", "user_management");
                 });
 
             modelBuilder.Entity("UserManagementService.Infrastructure.Entities.OtpRecord", b =>
@@ -175,6 +425,48 @@ namespace UserManagementService.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.RolePermission", b =>
+                {
+                    b.HasOne("UserManagementService.Infrastructure.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UserManagementService.Infrastructure.Entities.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.User", b =>
+                {
+                    b.HasOne("UserManagementService.Infrastructure.Entities.Role", "UserRole")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("UserRole");
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("UserManagementService.Infrastructure.Entities.Role", b =>
+                {
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("UserManagementService.Infrastructure.Entities.User", b =>

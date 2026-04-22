@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CourseCatalogService.Presentation.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin,Instructor")]
     [Route("api/sections/{sectionId}/lessons")]
     public class SectionLessonsController(ISectionService sectionService, ILogger<SectionLessonsController> logger) : ControllerBase
     {
@@ -13,7 +14,6 @@ namespace CourseCatalogService.Presentation.Controllers
         private readonly ILogger<SectionLessonsController> _logger = logger;
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Instructor")]
         public async Task<IActionResult> Add(int sectionId, [FromBody] LessonRequestDto dto, CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
@@ -34,7 +34,6 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Get(int sectionId, CancellationToken cancellationToken)
         {
             try

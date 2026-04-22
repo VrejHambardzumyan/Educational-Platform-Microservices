@@ -74,6 +74,8 @@ namespace CourseCatalogService
             builder.Services.AddScoped<ISectionService, SectionService>();
             builder.Services.AddScoped<IContentBlockRepository, ContentBlockRepository>();
             builder.Services.AddScoped<IContentBlockService, ContentBlockService>();
+            builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+            builder.Services.AddScoped<IRatingService, RatingService>();
 
             builder.Services.Configure<AzureBlobSettings>(builder.Configuration.GetSection("AzureBlobStorage"));
             builder.Services.AddSingleton<IBlobStorageService, AzureBlobStorageService>();

@@ -6,7 +6,10 @@
         public required string UserName { get; set; }
         public required string Email { get; set; }
         public required string Password { get; set; }
-        public string Role { get; set; } = "Student";
+
+        public int RoleId { get; set; } = RoleIds.Student;
+        public Role UserRole { get; set; } = null!;
+
         public bool IsDeleted { get; set; }
         public bool IsEmailVerified { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

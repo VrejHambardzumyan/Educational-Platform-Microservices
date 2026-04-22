@@ -12,6 +12,8 @@ namespace CourseEnrollment.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("course_enrollment");
+
             modelBuilder.ApplyConfiguration(new EnrollConfiguration());
         }
     }

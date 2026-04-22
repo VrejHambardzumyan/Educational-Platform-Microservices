@@ -17,6 +17,7 @@ namespace CourseCatalogService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("course_catalog")
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -58,7 +59,7 @@ namespace CourseCatalogService.Migrations
 
                     b.HasIndex("LessonId", "Order");
 
-                    b.ToTable("content_blocks", (string)null);
+                    b.ToTable("content_blocks", "course_catalog");
                 });
 
             modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.Course", b =>
@@ -68,6 +69,11 @@ namespace CourseCatalogService.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("AverageRating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0);
 
                     b.Property<string>("Category")
                         .HasMaxLength(100)
@@ -97,6 +103,11 @@ namespace CourseCatalogService.Migrations
                     b.Property<int>("Price")
                         .HasColumnType("integer");
 
+                    b.Property<int>("RatingCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -122,7 +133,44 @@ namespace CourseCatalogService.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("courses", (string)null);
+                    b.ToTable("courses", "course_catalog");
+                });
+
+            modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.CourseRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Feedback")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("course_ratings", "course_catalog");
                 });
 
             modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.Lesson", b =>
@@ -177,7 +225,7 @@ namespace CourseCatalogService.Migrations
 
                     b.HasIndex("CourseId", "OrderIndex");
 
-                    b.ToTable("Lessons", (string)null);
+                    b.ToTable("Lessons", "course_catalog");
                 });
 
             modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.Section", b =>
@@ -203,7 +251,7 @@ namespace CourseCatalogService.Migrations
 
                     b.HasIndex("CourseId", "Order");
 
-                    b.ToTable("sections", (string)null);
+                    b.ToTable("sections", "course_catalog");
                 });
 
             modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.ContentBlock", b =>
@@ -215,6 +263,17 @@ namespace CourseCatalogService.Migrations
                         .IsRequired();
 
                     b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.CourseRating", b =>
+                {
+                    b.HasOne("CourseCatalogService.Infrastructure.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("CourseCatalogService.Infrastructure.Entities.Lesson", b =>
