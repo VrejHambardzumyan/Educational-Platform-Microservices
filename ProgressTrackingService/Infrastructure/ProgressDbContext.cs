@@ -13,6 +13,8 @@ namespace ProgressTrackingService.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("progress_tracking");
+
             modelBuilder.ApplyConfiguration(new LessonProgressConfiguration());
             modelBuilder.ApplyConfiguration(new CourseProgressConfiguration());
         }

@@ -76,5 +76,15 @@ namespace CourseEnrollment.Infrastructure.Repositories
                     && e.Status != nameof(PaymentStatus.Failed),
                     cancellationToken);
         }
+
+        public async Task<int> SetProcessingAsync(int userId, Guid paymentId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Enrollments
+                .Where(e => e.UserId == userId && e.Status == nameof(PaymentStatus.Draft))
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(e => e.PaymentId, paymentId)
+                    .SetProperty(e => e.Status, nameof(PaymentStatus.Processing)),
+                    cancellationToken);
+        }
     }
 }

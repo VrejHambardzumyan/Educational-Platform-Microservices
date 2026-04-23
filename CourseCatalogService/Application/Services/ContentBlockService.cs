@@ -18,8 +18,6 @@ namespace CourseCatalogService.Application.Services
 
         public async Task<ContentBlockResponseDto> AddAsync(int lessonId, ContentBlockRequestDto dto, CancellationToken cancellationToken = default)
         {
-            Validate(dto);
-
             var block = new ContentBlock
             {
                 LessonId = lessonId,
@@ -39,8 +37,6 @@ namespace CourseCatalogService.Application.Services
         {
             var block = await _repository.GetByIdAsync(id, cancellationToken);
             if (block == null) return null;
-
-            Validate(dto);
 
             block.Type = dto.Type;
             block.Order = dto.Order;
@@ -87,14 +83,6 @@ namespace CourseCatalogService.Application.Services
             FileUrl = cb.FileUrl != null ? _blobStorage.RefreshSasUrl(cb.FileUrl, "documents") : null,
             Metadata = cb.Metadata
         };
-
-        private static void Validate(ContentBlockRequestDto dto)
-        {
-            if (dto.Type == ContentBlockType.Video && dto.VideoUrl == null)
-                throw new ArgumentException("A Video block must have a VideoUrl.");
-            if (dto.Type == ContentBlockType.File && dto.FileUrl == null)
-                throw new ArgumentException("A File block must have a FileUrl.");
-        }
 
         private static ContentBlockResponseDto ToDto(ContentBlock cb) => new()
         {

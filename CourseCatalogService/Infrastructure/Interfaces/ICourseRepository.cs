@@ -9,6 +9,5 @@ namespace CourseCatalogService.Infrastructure.Interfaces
         Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken);
         Task<IEnumerable<Course>> GetByInstructorIdAsync(int instructorId, CancellationToken cancellationToken);
         Task UpdateAsync(Course entity);
-        Task SaveChangesAsync();
     }
 }

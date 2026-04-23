@@ -4,12 +4,13 @@ using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Services;
 using CourseEnrollment.Infrastructure;
-using CourseEnrollment.Infrastructure.Configuration;
 using CourseEnrollment.Infrastructure.Interfaces;
 using CourseEnrollment.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Shared.Authentication;
+using Shared.Middleware;
 
 namespace CourseEnrollment
 {
@@ -38,8 +39,11 @@ namespace CourseEnrollment
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
 
-            builder.Services.AddJwtAuthentication(builder.Configuration);
+            builder.Services.AddSharedJwtAuthentication(builder.Configuration);
             builder.Services.AddAuthorization();
+
+            builder.Services.AddScoped<IServiceTokenProvider, ServiceTokenProvider>();
+            builder.Services.AddScoped<ValidateWebhookSignatureFilter>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -99,6 +103,7 @@ namespace CourseEnrollment
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();

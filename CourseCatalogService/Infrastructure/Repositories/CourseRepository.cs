@@ -59,10 +59,5 @@ namespace CourseCatalogService.Infrastructure.Repositories
             _context.Courses.Update(entity);
             await _context.SaveChangesAsync();
         }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

@@ -19,5 +19,11 @@ namespace CourseEnrollment.Infrastructure.Interfaces
 
         Task<IEnumerable<EnrollmentEntity>> GetAllByPaymentIdAsync(Guid paymentId, CancellationToken cancellationToken = default);
         Task<bool> HasActiveEnrollmentAsync(int userId, int courseId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Atomically transitions all Draft enrollments for the user to Processing, assigning the given paymentId.
+        /// Returns the number of rows affected (0 means no drafts existed).
+        /// </summary>
+        Task<int> SetProcessingAsync(int userId, Guid paymentId, CancellationToken cancellationToken = default);
     }
 }

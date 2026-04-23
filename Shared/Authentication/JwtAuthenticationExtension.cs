@@ -10,9 +10,10 @@ namespace Shared.Authentication
     {
         public static IServiceCollection AddSharedJwtAuthentication(
             this IServiceCollection services,
-            IConfiguration configuration,
-            string publicKeyPath = "C:\\Users\\ideat\\Documents\\public_key.pem")
+            IConfiguration configuration)
         {
+            var publicKeyPath = configuration["JwtSettings:PublicKeyPath"]
+                ?? throw new InvalidOperationException("JwtSettings:PublicKeyPath is not configured.");
             var rsa = RSA.Create();
             rsa.ImportFromPem(File.ReadAllText(publicKeyPath));
 

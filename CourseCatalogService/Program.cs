@@ -9,6 +9,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.Authentication;
+using Shared.Middleware;
 using System.Reflection;
 
 namespace CourseCatalogService
@@ -32,7 +34,7 @@ namespace CourseCatalogService
                         .AllowAnyMethod());
             });
 
-            builder.Services.AddJwtAuthentication(builder.Configuration);
+            builder.Services.AddSharedJwtAuthentication(builder.Configuration);
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
             builder.Services.AddPostgresDbContext(builder.Configuration);
@@ -101,6 +103,7 @@ namespace CourseCatalogService
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseHttpsRedirection();
 
             // ORDER MATTERS � CORS must come before Auth

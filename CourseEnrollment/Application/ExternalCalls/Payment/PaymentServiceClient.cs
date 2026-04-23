@@ -1,20 +1,23 @@
-﻿using CourseEnrollment.Application.ExternalCalls.Payment;
+using CourseEnrollment.Application.ExternalCalls.Payment;
 using Microsoft.Extensions.Options;
+using Shared.Authentication;
 
 namespace CourseEnrollment.Application.ExternalCalls
 {
-    public class PaymentServiceClient : IPaymentServiceClient
+    public class PaymentServiceClient(
+        HttpClient httpClient,
+        IOptions<PaymentServiceSettings> settings,
+        IServiceTokenProvider tokenProvider) : IPaymentServiceClient
     {
-        private readonly HttpClient _httpClient;
-        private readonly PaymentServiceSettings _settings;
-        public PaymentServiceClient(HttpClient httpClient,IOptions<PaymentServiceSettings> settings)
-        {
-            _httpClient = httpClient;
-            _settings = settings.Value;
-        }
+        private readonly HttpClient _httpClient = httpClient;
+        private readonly PaymentServiceSettings _settings = settings.Value;
+        private readonly IServiceTokenProvider _tokenProvider = tokenProvider;
 
         public async Task<PaymentServiceResponseDto> CreatPaymentAsync(int userId, Guid paymentId, decimal totalAmount, CancellationToken cancellationToken = default)
         {
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _tokenProvider.GenerateToken());
+
             var request = new
             {
                 UserId = userId,

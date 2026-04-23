@@ -2,6 +2,7 @@ using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Middleware;
 
 namespace CourseEnrollment.Presentation.Controllers
 {
@@ -27,60 +28,22 @@ namespace CourseEnrollment.Presentation.Controllers
             if (userId == null) return Unauthorized();
 
             requestDto.UserId = userId.Value;
-
-            try
-            {
-                var result = await _enrollment.AddEnrollmentAsync(requestDto, cancellationToken);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to create enrollment");
-                return StatusCode(500, new { message = "Failed to create enrollment." });
-            }
+            var result = await _enrollment.AddEnrollmentAsync(requestDto, cancellationToken);
+            return Ok(result);
         }
 
         [HttpPut("Activate/{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ActivateAsync(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _enrollment.MarkAsPaidAsync(id, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to activate enrollment");
-                return StatusCode(500, new { message = "Failed to activate enrollment." });
-            }
+            await _enrollment.MarkAsPaidAsync(id, cancellationToken);
+            return NoContent();
         }
 
         [HttpPut("Cancel/{id}")]
         public async Task<IActionResult> CancelAsync(int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _enrollment.MarkAsDeletedAsync(id, cancellationToken);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to cancel enrollment");
-                return StatusCode(500, new { message = "Failed to cancel enrollment." });
-            }
+            await _enrollment.MarkAsDeletedAsync(id, cancellationToken);
+            return NoContent();
         }
 
         /// <summary>
@@ -133,44 +96,17 @@ namespace CourseEnrollment.Presentation.Controllers
             var userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            try
-            {
-                var paymentId = await _enrollment.SubmitCardAsync(userId.Value, cardDto, cancellationToken);
-                return Ok(new { paymentId });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Card submission failed");
-                return StatusCode(500, new { message = "Card submission failed." });
-            }
+            var paymentId = await _enrollment.SubmitCardAsync(userId.Value, cardDto, cancellationToken);
+            return Ok(new { paymentId });
         }
 
         [HttpPost("PaymentCallback")]
         [AllowAnonymous]
+        [ValidateWebhookSignature]
         public async Task<IActionResult> PaymentCallback([FromBody] PaymentCallbackDto dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _enrollment.HandlePaymentCallbackAsync(dto.PaymentId, dto.IsSuccess, cancellationToken);
-                return Ok(new { message = "Payment status updated successfully" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Payment callback failed");
-                return StatusCode(500, new { message = "Payment callback processing failed." });
-            }
+            await _enrollment.HandlePaymentCallbackAsync(dto.PaymentId, dto.IsSuccess, cancellationToken);
+            return Ok(new { message = "Payment status updated successfully" });
         }
 
         private int? GetCurrentUserId()

@@ -9,7 +9,6 @@ namespace UserManagementService.Infrastructure.Interfaces
         Task<User?> GetByIdAsync(int id);
         Task<(IEnumerable<User> Items, int TotalCount)> GetAllAsync(int page, int pageSize);
         Task UpdateAsync(User entity);
-        Task SaveChangesAsync();
         Task DeleteAsync(User entity);
 
         Task AddRefreshTokenAsync(RefreshToken token);

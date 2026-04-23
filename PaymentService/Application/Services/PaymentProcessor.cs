@@ -4,6 +4,9 @@ using PaymentService.Application.Models;
 using PaymentService.Infrastructure.Configuration;
 using PaymentService.Infrastructure.Entities;
 using PaymentService.Infrastructure.Interfaces;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 
 namespace PaymentService.Application.Services
 {
@@ -120,18 +123,33 @@ namespace PaymentService.Application.Services
         {
             try
             {
-                var client = _httpClientFactory.CreateClient();
                 var payload = new { PaymentId = paymentId, IsSuccess = isSuccess, FailureReason = failureReason };
+                var body = JsonSerializer.Serialize(payload);
+                var signature = ComputeHmac(body, _callback.WebhookSecret);
                 var url = $"{_callback.BaseUrl}/CourseEnrollment/PaymentCallback";
 
                 _logger.LogInformation("Firing webhook callback to {Url}", url);
-                var response = await client.PostAsJsonAsync(url, payload);
+
+                using var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.Add("X-Webhook-Signature", signature);
+                request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.SendAsync(request);
                 response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Webhook callback failed for PaymentId {PaymentId}", paymentId);
             }
+        }
+
+        private static string ComputeHmac(string body, string secret)
+        {
+            var keyBytes = Encoding.UTF8.GetBytes(secret);
+            var bodyBytes = Encoding.UTF8.GetBytes(body);
+            using var hmac = new HMACSHA256(keyBytes);
+            return Convert.ToHexString(hmac.ComputeHash(bodyBytes)).ToLowerInvariant();
         }
     }
 }

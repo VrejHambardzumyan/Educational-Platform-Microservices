@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService.Application.Interfaces;
 using PaymentService.Application.Models;
@@ -6,6 +7,7 @@ namespace PaymentService.Presentation.Controllers
 {
     [ApiController]
     [Route("api/payments")]
+    [Authorize]
     public class PaymentsController(IPaymentProcessor processor, ILogger<PaymentsController> logger) : ControllerBase
     {
         private readonly IPaymentProcessor _processor = processor;

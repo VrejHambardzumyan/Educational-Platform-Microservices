@@ -9,25 +9,7 @@ namespace CourseCatalogService.Application.Services
     {
         public async Task<RatingResponseDto> UpsertRatingAsync(int courseId, int userId, RatingRequestDto dto)
         {
-            var existing = await ratingRepo.GetByUserAndCourseAsync(userId, courseId);
-
-            if (existing is not null)
-            {
-                existing.Rating = dto.Rating;
-                existing.Feedback = dto.Feedback;
-                await ratingRepo.UpdateAsync(existing);
-            }
-            else
-            {
-                existing = new CourseRating
-                {
-                    CourseId = courseId,
-                    UserId = userId,
-                    Rating = dto.Rating,
-                    Feedback = dto.Feedback
-                };
-                await ratingRepo.AddAsync(existing);
-            }
+            var rating = await ratingRepo.UpsertAsync(userId, courseId, dto.Rating, dto.Feedback);
 
             var (average, count) = await ratingRepo.RecalculateAsync(courseId);
             var course = await courseRepo.GetCourseByIdAsync(courseId, default);
@@ -38,7 +20,7 @@ namespace CourseCatalogService.Application.Services
                 await courseRepo.UpdateAsync(course);
             }
 
-            return MapToDto(existing);
+            return MapToDto(rating);
         }
 
         public async Task<CourseRatingSummaryDto?> GetCourseRatingsAsync(int courseId)

@@ -9,6 +9,8 @@ using UserManagementService.Application.Interfaces;
 using UserManagementService.Application.Models.JwtOption;
 using UserManagementService.Application.Services;
 using UserManagementService.Infrastructure;
+using Shared.Authentication;
+using Shared.Middleware;
 using UserManagementService.Infrastructure.Configuration;
 using UserManagementService.Infrastructure.Interfaces;
 using UserManagementService.Infrastructure.Repositories;
@@ -26,7 +28,7 @@ namespace UserManagementService
             builder.Services.AddPostgresDbContext(builder.Configuration);
 
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
-            builder.Services.AddJwtAuthentication(builder.Configuration);
+            builder.Services.AddSharedJwtAuthentication(builder.Configuration);
 
             // Permission-based authorization: dynamic policy provider + handler
             builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
@@ -107,6 +109,7 @@ namespace UserManagementService
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();

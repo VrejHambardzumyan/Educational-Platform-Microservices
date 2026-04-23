@@ -57,8 +57,8 @@ namespace CourseCatalogService.Application.Services
             var course = await _courseRepo.GetCourseByIdAsync(id, default);
             if (course == null || course.InstructorId != instructorId) return null;
 
-            if (!string.IsNullOrWhiteSpace(dto.Title)) course.Title = dto.Title;
-            if (!string.IsNullOrWhiteSpace(dto.Description)) course.Description = dto.Description;
+            if (dto.Title != null) course.Title = dto.Title;
+            if (dto.Description != null) course.Description = dto.Description;
             if (dto.DurationInMonth.HasValue) course.DurationInMonth = dto.DurationInMonth.Value;
             if (dto.Price.HasValue) course.Price = dto.Price.Value;
             if (dto.Category != null) course.Category = dto.Category;

@@ -10,12 +10,10 @@ namespace CourseCatalogService.Presentation.Controllers
     public class CourseCatalogController : ControllerBase
     {
         private readonly ICourseService _courseService;
-        private readonly ILogger<CourseCatalogController> _logger;
 
-        public CourseCatalogController(ILogger<CourseCatalogController> logger, ICourseService courseService)
+        public CourseCatalogController(ICourseService courseService)
         {
             _courseService = courseService;
-            _logger = logger;
         }
 
         [HttpPost("AddCourse")]
@@ -25,20 +23,12 @@ namespace CourseCatalogService.Presentation.Controllers
             var instructorId = GetCurrentUserId();
             if (instructorId == null) return Unauthorized();
 
-            try
-            {
-                var created = await _courseService.AddCourseAsync(dto, instructorId.Value);
-                return CreatedAtAction(nameof(GetCourse), new { id = created.Id }, created);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add course");
-                return StatusCode(500, new { message = "Failed to add course." });
-            }
+            var created = await _courseService.AddCourseAsync(dto, instructorId.Value);
+            return CreatedAtAction(nameof(GetCourse), new { id = created.Id }, created);
         }
 
         [HttpGet("GetAllCourses")]
-        [Authorize(Roles = "Admin,Instructor,Student")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCourses(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20,
@@ -53,7 +43,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet("GetCourseById/{id}")]
-        [Authorize(Roles = "Admin,Instructor,Student")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
         {
             var course = await _courseService.GetCourseByIdAsync(id, cancellationToken);

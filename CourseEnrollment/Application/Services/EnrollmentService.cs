@@ -1,4 +1,4 @@
-﻿using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
+using CourseEnrollment.Application.ExternalCalls.CouseCatalog;
 using CourseEnrollment.Application.ExternalCalls.Payment;
 using CourseEnrollment.Application.Interfaces;
 using CourseEnrollment.Application.Models.DTOs;
@@ -37,55 +37,19 @@ namespace CourseEnrollment.Application.Services
 
             var created = await _enrollmentRepo.AddEnrollmentAsync(enrollment, cancellationToken);
 
-            return new EnrollmentResponseDto
-            {
-                Id = enrollment.Id,
-                UserId = enrollment.UserId,
-                CourseId = enrollment.CourseId,
-                CreatedAt = enrollment.CreatedAt,
-                Amount = enrollment.Amount,
-                ActivatedAt = enrollment.ActivatedAt,
-                Status = enrollment.Status,
-            };
+            return MapToDto(created);
         }
 
         public async Task<IEnumerable<EnrollmentResponseDto>> GetAllByUserIdAsync(int userId, CancellationToken cancellationToken = default)
         {
             var enrollments = await _enrollmentRepo.GetAllByUserIdAsync(userId, cancellationToken);
-
-            var result = enrollments.Select(e => new EnrollmentResponseDto
-            {
-                Id = e.Id,
-                UserId = e.UserId,
-                CourseId = e.CourseId,
-                CreatedAt = e.CreatedAt,
-                Amount = e.Amount,
-                ActivatedAt = e.ActivatedAt,
-                Status = e.Status
-            });
-            return result;
+            return enrollments.Select(MapToDto);
         }
 
         public async Task<EnrollmentResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            var enrollmetnt = await _enrollmentRepo.GetByIdAsync(id, cancellationToken);
-
-            if (enrollmetnt == null)
-            {
-                return null;
-            }
-
-            return new EnrollmentResponseDto
-            {
-                Id = enrollmetnt.Id,
-                UserId = enrollmetnt.UserId,
-                CourseId = enrollmetnt.CourseId,
-                CreatedAt = enrollmetnt.CreatedAt,
-                Amount = enrollmetnt.Amount,
-                ActivatedAt = enrollmetnt.ActivatedAt,
-                Status = enrollmetnt.Status
-
-            };
+            var entity = await _enrollmentRepo.GetByIdAsync(id, cancellationToken);
+            return entity == null ? null : MapToDto(entity);
         }
 
         public async Task MarkAsDeletedAsync(int enrollmentId, CancellationToken cancellationToken = default)
@@ -109,29 +73,22 @@ namespace CourseEnrollment.Application.Services
             if (!CardValidator.IsValidCvv(cardDto.Cvv))
                 throw new ArgumentException("Invalid CVV.");
 
-            var userEnrollments = await _enrollmentRepo.GetAllByUserIdAsync(userId, cancellationToken);
-            var draftEnrollments = userEnrollments.Where(e => e.Status == "Draft").ToList();
-
-            if (draftEnrollments.Count == 0)
-                throw new InvalidOperationException("No draft enrollments to pay for.");
-
             var paymentId = Guid.NewGuid();
 
-            foreach (var e in draftEnrollments)
-            {
-                e.PaymentId = paymentId;
-                e.Status = nameof(PaymentStatus.Processing);
-            }
+            // Atomically claim all Draft enrollments — concurrent calls get 0 rows and fail fast
+            var claimedCount = await _enrollmentRepo.SetProcessingAsync(userId, paymentId, cancellationToken);
+            if (claimedCount == 0)
+                throw new InvalidOperationException("No draft enrollments to pay for.");
 
-            await _enrollmentRepo.SaveChangesAsync(cancellationToken);
+            var processing = await _enrollmentRepo.GetAllByPaymentIdAsync(paymentId, cancellationToken);
+            var totalAmount = processing.Sum(e => e.Amount);
 
-            var totalAmount = draftEnrollments.Sum(e => e.Amount);
-            // PaymentService receives the charge, runs the Stripe simulation,
-            // and fires POST /CourseEnrollment/PaymentCallback when done
+            // PaymentService fires POST /CourseEnrollment/PaymentCallback when done
             await _paymentClient.CreatPaymentAsync(userId, paymentId, totalAmount, cancellationToken);
 
             return paymentId;
         }
+
         public async Task HandlePaymentCallbackAsync(Guid paymentId, bool isSuccess, CancellationToken cancellationToken = default)
         {
             var enrollments = await _enrollmentRepo.GetAllByPaymentIdAsync(paymentId, cancellationToken);
@@ -154,5 +111,17 @@ namespace CourseEnrollment.Application.Services
 
             await _enrollmentRepo.SaveChangesAsync(cancellationToken);
         }
+
+        private static EnrollmentResponseDto MapToDto(EnrollmentEntity e) => new()
+        {
+            Id = e.Id,
+            UserId = e.UserId,
+            CourseId = e.CourseId,
+            CreatedAt = e.CreatedAt,
+            Amount = e.Amount,
+            PaymentId = e.PaymentId,
+            ActivatedAt = e.ActivatedAt,
+            Status = e.Status
+        };
     }
 }
