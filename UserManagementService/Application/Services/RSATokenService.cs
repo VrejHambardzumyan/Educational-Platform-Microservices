@@ -13,10 +13,7 @@ namespace UserManagementService.Application.Services
     {
         private readonly JwtOptions _options;
         private readonly RSA _rsaPrivate;
-        //private readonly RSA _rsaPublic;
         private readonly RsaSecurityKey _privateKey;
-        //private readonly RsaSecurityKey _publicKey;
-
 
         public RSATokenService(IOptions<JwtOptions> options)
         {
@@ -28,12 +25,6 @@ namespace UserManagementService.Application.Services
             _rsaPrivate = RSA.Create();
             _rsaPrivate.ImportFromPem(File.ReadAllText(_options.PrivateKeyPath));   
             _privateKey = new RsaSecurityKey(_rsaPrivate);
-            //_options = options.Value
-            //if (string.IsNullOrEmpty(_options.PublicKeyPath))
-            //    throw new Exception("Public key path not configured");
-            //_rsaPublic = RSA.Create();
-            //_rsaPublic.ImportFromPem(File.ReadAllText(_options.PublicKeyPath));
-            //_publicKey = new RsaSecurityKey(_rsaPublic);
         }
         /// <summary>
         /// Generates a signed JWT containing the user's role (for backward-compatible role checks)
@@ -78,12 +69,5 @@ namespace UserManagementService.Application.Services
             rng.GetBytes(randomBytes);
             return Convert.ToBase64String(randomBytes);
         }
-
-        //public SecurityKey GetPublicKey() => _publicKey;
-        //public void Dispose()
-        //{
-        //    _rsaPrivate?.Dispose();
-        //    //_rsaPublic?.Dispose();
-        //}
     }
 }

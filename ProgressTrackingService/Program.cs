@@ -8,6 +8,7 @@ using ProgressTrackingService.Infrastructure.Http;
 using ProgressTrackingService.Infrastructure.Interfaces;
 using ProgressTrackingService.Infrastructure.Repositories;
 using Shared.Authentication;
+using Shared.Middleware;
 
 namespace ProgressTrackingService
 {
@@ -20,9 +21,7 @@ namespace ProgressTrackingService
             builder.Services.AddDbContext<ProgressDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddSharedJwtAuthentication(builder.Configuration,
-                builder.Configuration["JwtSettings:PublicKeyPath"]
-                    ?? "C:\\Users\\ideat\\Documents\\public_key.pem");
+            builder.Services.AddSharedJwtAuthentication(builder.Configuration);
 
             builder.Services.AddAuthorization();
 
@@ -97,6 +96,7 @@ namespace ProgressTrackingService
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
