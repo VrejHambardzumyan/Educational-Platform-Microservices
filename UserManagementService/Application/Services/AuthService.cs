@@ -20,7 +20,7 @@ namespace UserManagementService.Application.Services
         private readonly IOtpService _otpService = otpService;
         private readonly TwoFactorSettings _twoFactor = twoFactorOptions.Value;
 
-        public async Task<RegisterResponseDto> RegisterUserAsync(string userName, string password, string email, CancellationToken cancellationToken = default)
+        public async Task<RegisterResponseDto> RegisterUserAsync(string userName, string password, string email, string role, CancellationToken cancellationToken = default)
         {
             var existingUser = await _userRepository.GetByUserNameAsync(userName);
             if (existingUser != null)
@@ -35,12 +35,13 @@ namespace UserManagementService.Application.Services
                 UserName = userName,
                 Password = BCrypt.Net.BCrypt.HashPassword(password),
                 Email = email,
+                RoleId = role == "Instructor" ? RoleIds.Instructor : RoleIds.Student,
                 IsEmailVerified = !_twoFactor.Enabled
             };
 
             await _userRepository.AddEntityAsync(user);
 
-            if (_twoFactor.Enabled)
+            if (_twoFactor.Enabled && user.OtpEnabled)
             {
                 try
                 {
@@ -68,7 +69,7 @@ namespace UserManagementService.Application.Services
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
                 throw new UnauthorizedAccessException("Invalid username or password.");
 
-            if (_twoFactor.Enabled && !user.IsEmailVerified)
+            if (_twoFactor.Enabled && user.OtpEnabled && !user.IsEmailVerified)
                 throw new UnauthorizedAccessException("Email not verified. Please complete signup OTP verification.");
 
             var (accessToken, refreshToken) = await IssueTokensAsync(user);

@@ -22,7 +22,7 @@ namespace UserManagementService.Presentation.Controllers
         {
             try
             {
-                var result = await _authService.RegisterUserAsync(request.UserName, request.Password, request.Email, cancellationToken);
+                var result = await _authService.RegisterUserAsync(request.UserName, request.Password, request.Email, request.Role, cancellationToken);
                 return Ok(result);
             }
             catch (InvalidOperationException ex)

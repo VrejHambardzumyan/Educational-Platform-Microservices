@@ -43,6 +43,18 @@ namespace UserManagementService.Presentation.Controllers
             return Ok(updated);
         }
 
+        /// <summary>Enables or disables OTP for the authenticated user.</summary>
+        [HttpPut("me/otp")]
+        public async Task<IActionResult> UpdateOtpPreference([FromBody] UpdateOtpPreferenceRequestDto dto)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            var result = await _userService.SetOtpEnabledAsync(userId.Value, dto.Enabled);
+            if (!result) return NotFound();
+            return Ok(new { otpEnabled = dto.Enabled });
+        }
+
         /// <summary>Returns any user's profile. Requires the <c>users.read_any</c> permission.</summary>
         [HttpGet("{id}")]
         [HasPermission(Permissions.UsersReadAny)]
@@ -65,11 +77,35 @@ namespace UserManagementService.Presentation.Controllers
             return Ok(result);
         }
 
-        /// <summary>Assigns a new role to the specified user. Requires the <c>users.manage</c> permission.</summary>
+        /// <summary>
+        /// Assigns a role to the specified user.
+        /// Authenticated users may switch their own role between Student and Instructor.
+        /// Changing another user's role, or assigning Admin, requires the <c>users.manage</c> permission.
+        /// </summary>
         [HttpPut("{id}/role")]
-        [HasPermission(Permissions.UsersManage)]
         public async Task<IActionResult> UpdateUserRole(int id, UpdateRoleRequestDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            var isAdmin = User.HasClaim("permissions", Permissions.UsersManage);
+
+            if (id == currentUserId.Value && !isAdmin)
+            {
+                try
+                {
+                    var result = await _userService.SwitchOwnRoleAsync(id, dto.Role);
+                    if (!result) return NotFound();
+                    return NoContent();
+                }
+                catch (ArgumentException ex)
+                {
+                    return BadRequest(new { message = ex.Message });
+                }
+            }
+
+            if (!isAdmin) return Forbid();
+
             try
             {
                 var result = await _userService.UpdateRoleAsync(id, dto.Role);

@@ -32,10 +32,15 @@ namespace CourseEnrollment.Application.Services
                 CourseId = requestDtoEntity.CourseId,
                 CreatedAt = DateTime.UtcNow,
                 Amount = price,
-                Status = nameof(PaymentStatus.Draft)
+                Status = price == 0
+                    ? nameof(PaymentStatus.Completed)
+                    : nameof(PaymentStatus.Draft)
             };
 
             var created = await _enrollmentRepo.AddEnrollmentAsync(enrollment, cancellationToken);
+           
+            if (price == 0)
+                enrollment.ActivatedAt = DateTime.UtcNow;
 
             return MapToDto(created);
         }

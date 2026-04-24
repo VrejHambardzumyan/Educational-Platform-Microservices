@@ -20,10 +20,10 @@ namespace CourseCatalogService.Application.ModelValidation
 
             RuleFor(x => x.DurationInMonth)
                 .GreaterThan(0).WithMessage("Duration must be at least 1 month")
-                .LessThanOrEqualTo(24).WithMessage("Duration can't exceed 2 years");
+                .LessThanOrEqualTo(12).WithMessage("Duration can't exceed 1 year");
 
             RuleFor(x => x.Price)
-                .GreaterThan(0).WithMessage("Price must be greater than 0")
+                .GreaterThanOrEqualTo(0).WithMessage("Price must be greater than or equal to 0")
                 .LessThanOrEqualTo(100000).WithMessage("Price too high");
 
             RuleFor(x => x.Category)

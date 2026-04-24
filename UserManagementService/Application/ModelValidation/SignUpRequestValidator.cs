@@ -24,6 +24,10 @@ namespace UserManagementService.Application.ModelValidation
                    .NotEmpty().WithMessage("Email is required")
                    .EmailAddress().WithMessage("Email must be a valid email address")
                    .MaximumLength(150).WithMessage("Email must be at most 150 characters long");
+
+            RuleFor(signUpRequest => signUpRequest.Role)
+                   .Must(r => r == "Student" || r == "Instructor")
+                   .WithMessage("Role must be 'Student' or 'Instructor'.");
         }
     }
 }

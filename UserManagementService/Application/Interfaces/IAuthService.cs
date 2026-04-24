@@ -4,7 +4,7 @@ namespace UserManagementService.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<RegisterResponseDto> RegisterUserAsync(string userName, string password, string email, CancellationToken cancellationToken = default);
+        Task<RegisterResponseDto> RegisterUserAsync(string userName, string password, string email, string role, CancellationToken cancellationToken = default);
         Task<AuthResponseDto> LoginUserAsync(string userName, string password);
         Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
         Task RevokeTokenAsync(string refreshToken);

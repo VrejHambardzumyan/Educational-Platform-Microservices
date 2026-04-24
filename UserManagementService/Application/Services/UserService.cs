@@ -11,6 +11,7 @@ namespace UserManagementService.Application.Services
         private readonly IRoleRepository _roleRepo = roleRepo;
 
         private static readonly HashSet<string> ValidRoles = ["Student", "Instructor", "Admin"];
+        private static readonly HashSet<string> SwitchableRoles = ["Student", "Instructor"];
 
         /// <summary>Returns a user's public profile, or null when the user does not exist.</summary>
         public async Task<UserProfileResponseDto?> GetByIdAsync(int id)
@@ -97,6 +98,37 @@ namespace UserManagementService.Application.Services
             if (user == null) return false;
 
             user.IsDeleted = true;
+            await _userRepo.UpdateAsync(user);
+            return true;
+        }
+
+        /// <summary>
+        /// Lets a user switch their own role between Student and Instructor.
+        /// Throws <see cref="ArgumentException"/> when <paramref name="role"/> is not in <see cref="SwitchableRoles"/>.
+        /// </summary>
+        public async Task<bool> SwitchOwnRoleAsync(int userId, string role)
+        {
+            if (!SwitchableRoles.Contains(role))
+                throw new ArgumentException("You can only switch between 'Student' and 'Instructor'.");
+
+            var roleEntity = await _roleRepo.GetByNameAsync(role)
+                ?? throw new ArgumentException($"Role '{role}' not found in the database.");
+
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null) return false;
+
+            user.RoleId = roleEntity.Id;
+            await _userRepo.UpdateAsync(user);
+            return true;
+        }
+
+        /// <summary>Flips OtpEnabled for the given user. Returns false when the user does not exist.</summary>
+        public async Task<bool> SetOtpEnabledAsync(int userId, bool enabled)
+        {
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null) return false;
+
+            user.OtpEnabled = enabled;
             await _userRepo.UpdateAsync(user);
             return true;
         }
