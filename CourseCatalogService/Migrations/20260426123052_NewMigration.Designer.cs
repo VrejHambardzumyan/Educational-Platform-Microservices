@@ -3,6 +3,7 @@ using System;
 using CourseCatalogService.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -12,9 +13,11 @@ using NpgsqlTypes;
 namespace CourseCatalogService.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260426123052_NewMigration")]
+    partial class NewMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,7 +117,7 @@ namespace CourseCatalogService.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("tsvector")
                         .HasColumnName("search_vector")
-                        .HasComputedColumnSql("to_tsvector('english', coalesce(\"Title\",'') || ' ' || coalesce(\"Description\",''))", true);
+                        .HasComputedColumnSql("to_tsvector('english', coalesce(Title,'') || ' ' || coalesce(description,''))", true);
 
                     b.Property<string>("Status")
                         .IsRequired()

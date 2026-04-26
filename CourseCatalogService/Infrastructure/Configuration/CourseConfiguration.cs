@@ -55,7 +55,7 @@ namespace CourseCatalogService.Infrastructure.Configuration
             builder.Property(c => c.SearchVector)
                 .HasColumnName("search_vector")
                 .HasComputedColumnSql(
-                    "to_tsvector('english', coalesce(Title,'') || ' ' || coalesce(description,''))",
+                    "to_tsvector('english', coalesce(\"Title\",'') || ' ' || coalesce(\"Description\",''))",
                     stored: true);
 
             builder.HasIndex(c => c.SearchVector)

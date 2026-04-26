@@ -23,11 +23,11 @@ namespace UserManagementService.Application.Services
         public async Task<RegisterResponseDto> RegisterUserAsync(string userName, string password, string email, string role, CancellationToken cancellationToken = default)
         {
             var existingUser = await _userRepository.GetByUserNameAsync(userName);
-            if (existingUser != null)
+            if (existingUser != null && existingUser.IsEmailVerified)
                 throw new InvalidOperationException($"User with username '{userName}' already exists.");
 
             var existingEmail = await _userRepository.GetByEmailAsync(email, cancellationToken);
-            if (existingEmail != null)
+            if (existingEmail != null && existingEmail.IsEmailVerified)
                 throw new InvalidOperationException("An account with this email already exists.");
 
             var user = new User

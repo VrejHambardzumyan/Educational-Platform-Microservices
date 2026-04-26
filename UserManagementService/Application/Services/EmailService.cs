@@ -55,6 +55,7 @@ namespace UserManagementService.Application.Services
         private static int GetExpiryText(string purpose) => purpose switch
         {
             "Payment" => 5,
+            "SignUp" => 1,
             _ => 10
         };
     }
