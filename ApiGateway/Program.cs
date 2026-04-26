@@ -7,7 +7,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// JWT validation at gateway — audience not enforced here; each downstream service enforces its own
+
 var publicKeyPath = builder.Configuration["JwtSettings:PublicKeyPath"];
 var rsa = RSA.Create();
 rsa.ImportFromPem(File.ReadAllText(publicKeyPath!));
@@ -18,7 +18,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "AuthService",
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,

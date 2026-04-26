@@ -79,10 +79,16 @@ namespace CourseCatalogService.Application.Services
             Type = cb.Type,
             Order = cb.Order,
             TextContent = cb.TextContent,
-            VideoUrl = cb.VideoUrl != null ? _blobStorage.RefreshSasUrl(cb.VideoUrl, "videos") : null,
-            FileUrl = cb.FileUrl != null ? _blobStorage.RefreshSasUrl(cb.FileUrl, "documents") : null,
+            VideoUrl = cb.VideoUrl != null ? TryRefreshSasUrl(cb.VideoUrl, "videos") : null,
+            FileUrl = cb.FileUrl != null ? TryRefreshSasUrl(cb.FileUrl, "documents") : null,
             Metadata = cb.Metadata
         };
+
+        private string TryRefreshSasUrl(string url, string container)
+        {
+            try { return _blobStorage.RefreshSasUrl(url, container); }
+            catch { return url; }
+        }
 
         private static ContentBlockResponseDto ToDto(ContentBlock cb) => new()
         {

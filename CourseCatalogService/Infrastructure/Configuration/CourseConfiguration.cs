@@ -51,6 +51,15 @@ namespace CourseCatalogService.Infrastructure.Configuration
             builder.HasIndex(c => c.InstructorId);
             builder.HasIndex(c => c.Status);
             builder.HasIndex(c => c.Category);
+
+            builder.Property(c => c.SearchVector)
+                .HasColumnName("search_vector")
+                .HasComputedColumnSql(
+                    "to_tsvector('english', coalesce(Title,'') || ' ' || coalesce(description,''))",
+                    stored: true);
+
+            builder.HasIndex(c => c.SearchVector)
+                .HasMethod("GIN");
         }
     }
 }

@@ -1,3 +1,5 @@
+using NpgsqlTypes;
+
 namespace CourseCatalogService.Infrastructure.Entities
 {
     public class Course
@@ -16,6 +18,7 @@ namespace CourseCatalogService.Infrastructure.Entities
         public int RatingCount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        public NpgsqlTsVector SearchVector { get; set; } = null!;
     }
 
     public enum CourseStatus

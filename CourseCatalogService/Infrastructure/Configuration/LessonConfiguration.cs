@@ -18,9 +18,6 @@ namespace CourseCatalogService.Infrastructure.Configuration
             builder.Property(l => l.Description)
                 .HasMaxLength(2000);
 
-            builder.Property(l => l.VideoUrl)
-                .HasMaxLength(1000);
-
             builder.Property(l => l.IsDeleted)
                 .HasDefaultValue(false);
 

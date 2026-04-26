@@ -31,12 +31,20 @@ namespace CourseCatalogService.Infrastructure.Repositories
             if (!string.IsNullOrWhiteSpace(category))
                 query = query.Where(c => c.Category == category);
 
+            IQueryable<Course> orderedQuery;
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(c => c.Title.Contains(search) || c.Description.Contains(search));
+            {
+                var tsQuery = EF.Functions.ToTsQuery("english", string.Join(" & ", search.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)));
+                query = query.Where(c => c.SearchVector.Matches(tsQuery));
+                orderedQuery = query.OrderByDescending(c => c.SearchVector.RankCoverDensity(tsQuery));
+            }
+            else
+            {
+                orderedQuery = query.OrderByDescending(c => c.CreatedAt);
+            }
 
             var totalCount = await query.CountAsync();
-            var items = await query
-                .OrderByDescending(c => c.CreatedAt)
+            var items = await orderedQuery
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

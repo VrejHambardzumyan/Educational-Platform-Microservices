@@ -34,6 +34,7 @@ namespace CourseCatalogService.Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int sectionId, CancellationToken cancellationToken)
         {
             try

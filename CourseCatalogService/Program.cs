@@ -104,9 +104,8 @@ namespace CourseCatalogService
             }
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
-            app.UseHttpsRedirection();
 
-            // ORDER MATTERS � CORS must come before Auth
+            // ORDER MATTERS� CORS must come before Auth
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();

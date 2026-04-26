@@ -23,7 +23,7 @@ namespace CourseEnrollment.Application.Services
             var hasActive = await _enrollmentRepo.HasActiveEnrollmentAsync(
                 requestDtoEntity.UserId, requestDtoEntity.CourseId, cancellationToken);
             if (hasActive)
-                throw new InvalidOperationException("User already has an active enrollment for this course.");
+                throw new InvalidOperationException("You already have an active enrollment for this course.");
 
             var price = await _catalogClient.GetCoursePriceAsync(requestDtoEntity.CourseId, cancellationToken);
             var enrollment = new EnrollmentEntity

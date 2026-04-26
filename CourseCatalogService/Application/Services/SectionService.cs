@@ -50,7 +50,6 @@ namespace CourseCatalogService.Application.Services
                 CourseId = section.CourseId,
                 Title = dto.Title,
                 Description = dto.Description,
-                VideoUrl = dto.VideoUrl,
                 OrderIndex = dto.OrderIndex,
                 DurationInMinutes = dto.DurationInMinutes
             };
@@ -83,7 +82,6 @@ namespace CourseCatalogService.Application.Services
             SectionId = l.SectionId,
             Title = l.Title,
             Description = l.Description,
-            VideoUrl = l.VideoUrl,
             OrderIndex = l.OrderIndex,
             DurationInMinutes = l.DurationInMinutes,
             CreatedAt = l.CreatedAt

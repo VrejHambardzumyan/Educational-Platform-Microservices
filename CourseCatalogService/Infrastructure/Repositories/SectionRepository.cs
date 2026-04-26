@@ -30,16 +30,5 @@ namespace CourseCatalogService.Infrastructure.Repositories
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         }
 
-        public async Task UpdateAsync(Section section, CancellationToken cancellationToken = default)
-        {
-            _context.Sections.Update(section);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task DeleteAsync(Section section, CancellationToken cancellationToken = default)
-        {
-            _context.Sections.Remove(section);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
     }
 }

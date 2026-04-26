@@ -21,7 +21,6 @@ namespace CourseCatalogService.Application.Services
                 CourseId = courseId,
                 Title = dto.Title,
                 Description = dto.Description,
-                VideoUrl = dto.VideoUrl,
                 OrderIndex = dto.OrderIndex,
                 DurationInMinutes = dto.DurationInMinutes
             };
@@ -52,7 +51,6 @@ namespace CourseCatalogService.Application.Services
 
             lesson.Title = dto.Title;
             if (dto.Description != null) lesson.Description = dto.Description;
-            if (dto.VideoUrl != null) lesson.VideoUrl = dto.VideoUrl;
             lesson.OrderIndex = dto.OrderIndex;
             lesson.DurationInMinutes = dto.DurationInMinutes;
 
@@ -74,19 +72,6 @@ namespace CourseCatalogService.Application.Services
             return await _lessonRepo.DeleteAsync(id);
         }
 
-        public async Task<LessonResponseDto?> UpdateVideoUrlAsync(int courseId, int lessonId, string videoUrl, int instructorId, CancellationToken cancellationToken = default)
-        {
-            var lesson = await _lessonRepo.GetByIdAsync(lessonId, cancellationToken);
-            if (lesson == null || lesson.CourseId != courseId) return null;
-
-            var course = await _courseRepo.GetCourseByIdAsync(courseId, cancellationToken);
-            if (course == null || course.InstructorId != instructorId) return null;
-
-            lesson.VideoUrl = videoUrl;
-            await _lessonRepo.UpdateAsync(lesson);
-            return MapToDto(lesson);
-        }
-
         private static LessonResponseDto MapToDto(Lesson l) => new()
         {
             Id = l.Id,
@@ -94,7 +79,6 @@ namespace CourseCatalogService.Application.Services
             SectionId = l.SectionId,
             Title = l.Title,
             Description = l.Description,
-            VideoUrl = l.VideoUrl,
             OrderIndex = l.OrderIndex,
             DurationInMinutes = l.DurationInMinutes,
             CreatedAt = l.CreatedAt

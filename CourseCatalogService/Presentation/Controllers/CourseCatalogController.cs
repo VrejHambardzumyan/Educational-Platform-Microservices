@@ -51,16 +51,8 @@ namespace CourseCatalogService.Presentation.Controllers
             return Ok(course);
         }
 
-        [HttpGet("instructor/{instructorId}")]
-        [Authorize(Roles = "Admin,Instructor")]
-        public async Task<IActionResult> GetByInstructor(int instructorId, CancellationToken cancellationToken)
-        {
-            var courses = await _courseService.GetByInstructorIdAsync(instructorId, cancellationToken);
-            return Ok(courses);
-        }
-
         [HttpGet("my-courses")]
-        [Authorize(Roles = "Instructor")]
+        [Authorize(Roles = "Admin,Instructor")]
         public async Task<IActionResult> GetMyCourses(CancellationToken cancellationToken)
         {
             var instructorId = GetCurrentUserId();

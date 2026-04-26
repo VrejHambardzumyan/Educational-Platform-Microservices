@@ -46,11 +46,6 @@ namespace CourseCatalogService.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<int> CountByCourseIdAsync(int courseId, CancellationToken cancellationToken = default)
-        {
-            return await _context.Lessons.CountAsync(l => l.CourseId == courseId && !l.IsDeleted, cancellationToken);
-        }
-
         public async Task<IEnumerable<Lesson>> GetBySectionIdAsync(int sectionId, CancellationToken cancellationToken = default)
         {
             return await _context.Lessons

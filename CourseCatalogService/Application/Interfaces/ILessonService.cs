@@ -9,6 +9,5 @@ namespace CourseCatalogService.Application.Interfaces
         Task<LessonResponseDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<LessonResponseDto?> UpdateLessonAsync(int id, LessonRequestDto dto, int instructorId);
         Task<bool> DeleteLessonAsync(int id, int instructorId, bool isAdmin);
-        Task<LessonResponseDto?> UpdateVideoUrlAsync(int courseId, int lessonId, string videoUrl, int instructorId, CancellationToken cancellationToken = default);
     }
 }
