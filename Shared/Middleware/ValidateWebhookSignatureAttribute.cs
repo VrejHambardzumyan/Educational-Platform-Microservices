@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Shared.Middleware;
 
-public class ValidateWebhookSignatureFilter(IConfiguration configuration) : IAsyncActionFilter
+public class ValidateWebhookSignatureFilter(IConfiguration configuration, ILogger<ValidateWebhookSignatureFilter> logger) : IAsyncActionFilter
 {
     private readonly string _secret = configuration["WebhookSettings:PaymentCallbackSecret"]
         ?? throw new InvalidOperationException("WebhookSettings:PaymentCallbackSecret is not configured.");
@@ -19,6 +20,7 @@ public class ValidateWebhookSignatureFilter(IConfiguration configuration) : IAsy
         var signature = context.HttpContext.Request.Headers["X-Webhook-Signature"].FirstOrDefault();
         if (signature is null)
         {
+            logger.LogWarning("Webhook rejected: X-Webhook-Signature header is missing.");
             context.Result = new UnauthorizedObjectResult(new { message = "Missing webhook signature." });
             return;
         }
@@ -32,6 +34,8 @@ public class ValidateWebhookSignatureFilter(IConfiguration configuration) : IAsy
                 Encoding.UTF8.GetBytes(computed),
                 Encoding.UTF8.GetBytes(signature.ToLowerInvariant())))
         {
+            logger.LogWarning("Webhook rejected: signature mismatch. Body length={BodyLength} Received={Received} Computed={Computed}",
+                body.Length, signature.ToLowerInvariant(), computed);
             context.Result = new UnauthorizedObjectResult(new { message = "Invalid webhook signature." });
             return;
         }

@@ -136,6 +136,11 @@ namespace PaymentService.Application.Services
 
                 var client = _httpClientFactory.CreateClient();
                 var response = await client.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Webhook callback returned {StatusCode}: {Body}", (int)response.StatusCode, errorBody);
+                }
                 response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
