@@ -35,12 +35,10 @@ namespace CourseEnrollment.Application.Services
                 Status = price == 0
                     ? nameof(PaymentStatus.Completed)
                     : nameof(PaymentStatus.Draft)
+                ActivatedAt = price == 0 ? DateTime.UtcNow : null
             };
 
             var created = await _enrollmentRepo.AddEnrollmentAsync(enrollment, cancellationToken);
-           
-            if (price == 0)
-                enrollment.ActivatedAt = DateTime.UtcNow;
 
             return MapToDto(created);
         }
