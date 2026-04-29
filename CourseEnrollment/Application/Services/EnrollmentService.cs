@@ -18,12 +18,12 @@ namespace CourseEnrollment.Application.Services
         private readonly ICourseCatalogClient _catalogClient = catalogClient;
         private readonly IEnrollmentRepository _enrollmentRepo = enrollmentRepo;
 
-        public async Task<EnrollmentResponseDto> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDtoEntity, CancellationToken cancellationToken = default)
+        public async Task<EnrollmentResponseDto?> AddEnrollmentAsync(CreateEnrollmentRequestDto requestDtoEntity, CancellationToken cancellationToken = default)
         {
             var hasActive = await _enrollmentRepo.HasActiveEnrollmentAsync(
                 requestDtoEntity.UserId, requestDtoEntity.CourseId, cancellationToken);
             if (hasActive)
-                throw new InvalidOperationException("You already have an active enrollment for this course.");
+                return null;
 
             var price = await _catalogClient.GetCoursePriceAsync(requestDtoEntity.CourseId, cancellationToken);
             var enrollment = new EnrollmentEntity

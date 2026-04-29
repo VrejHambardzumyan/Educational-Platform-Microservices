@@ -8,12 +8,12 @@ using System.Text;
 
 namespace Shared.Middleware;
 
-public class ValidateWebhookSignatureFilter(IConfiguration configuration, ILogger<ValidateWebhookSignatureFilter> logger) : IAsyncActionFilter
+public class ValidateWebhookSignatureFilter(IConfiguration configuration, ILogger<ValidateWebhookSignatureFilter> logger) : IAsyncResourceFilter
 {
     private readonly string _secret = configuration["WebhookSettings:PaymentCallbackSecret"]
         ?? throw new InvalidOperationException("WebhookSettings:PaymentCallbackSecret is not configured.");
 
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
         context.HttpContext.Request.EnableBuffering();
 

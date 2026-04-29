@@ -128,7 +128,8 @@ namespace PaymentService.Application.Services
                 var signature = ComputeHmac(body, _callback.WebhookSecret);
                 var url = $"{_callback.BaseUrl}/CourseEnrollment/PaymentCallback";
 
-                _logger.LogInformation("Firing webhook callback to {Url}", url);
+                _logger.LogInformation("[Webhook] Sending to {Url} | BodyLen={Len} | Sig={Sig} | Body={Body}",
+                    url, body.Length, signature, body);
 
                 using var request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.Add("X-Webhook-Signature", signature);

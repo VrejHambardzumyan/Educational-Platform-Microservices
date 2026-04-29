@@ -105,6 +105,11 @@ namespace CourseEnrollment
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseCors("AllowFrontend");
+            app.Use(async (ctx, next) =>
+            {
+                ctx.Request.EnableBuffering();
+                await next();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

@@ -29,6 +29,8 @@ namespace CourseEnrollment.Presentation.Controllers
 
             requestDto.UserId = userId.Value;
             var result = await _enrollment.AddEnrollmentAsync(requestDto, cancellationToken);
+            if (result == null)
+                return Conflict(new { message = "You already have an active enrollment for this course." });
             return Ok(result);
         }
 

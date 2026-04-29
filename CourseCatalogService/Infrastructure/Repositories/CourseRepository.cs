@@ -34,9 +34,11 @@ namespace CourseCatalogService.Infrastructure.Repositories
             IQueryable<Course> orderedQuery;
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var tsQuery = EF.Functions.ToTsQuery("english", string.Join(" & ", search.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)));
-                query = query.Where(c => c.SearchVector.Matches(tsQuery));
-                orderedQuery = query.OrderByDescending(c => c.SearchVector.RankCoverDensity(tsQuery));
+                var tsQueryString = string.Join(" & ", search.Trim()
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(w => w + ":*"));
+                query = query.Where(c => c.SearchVector.Matches(EF.Functions.ToTsQuery("english", tsQueryString)));
+                orderedQuery = query.OrderByDescending(c => c.SearchVector.RankCoverDensity(EF.Functions.ToTsQuery("english", tsQueryString)));
             }
             else
             {
